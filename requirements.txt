@@ -30,7 +30,6 @@ pyparsing==3.1.4
 python-dateutil==2.9.0.post0
 python-magic==0.4.27
 pytz==2024.1
-pywin32==306
 PyYAML==6.0.2
 requests==2.32.3
 rsa==4.7.2
