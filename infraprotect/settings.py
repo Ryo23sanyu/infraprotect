@@ -22,7 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-uirslahosm*_udwemotzje2fvpi0+ss7e=irj&q$i_b%hp#z#-"
 # SECURITY WARNING: don't run with debug turned on in production!
-
 DEBUG = False # True：デプロイ時はFalseとする
 
 ALLOWED_HOSTS = []
@@ -38,7 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "infra.apps.InfraConfig",
-    'storages', #←追加
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -119,13 +118,14 @@ USE_TZ = True
 
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
 STATIC_URL = "/static/"
+STATICFILES_DIRS    = [os.path.join(BASE_DIR, "static")]
 
 if DEBUG:
     STATICFILES_DIRS = ( # 同じくinfra/static/
         os.path.join(BASE_DIR, "/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
     )
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
 """
 MEDIA_URL   = "/media/"
 if DEBUG:
@@ -150,23 +150,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10 MBの例
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
-}
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 """
 if not DEBUG: # 27行目のDEBUGがFalseになっていることを確認
 
@@ -248,7 +231,8 @@ if not DEBUG:
 
     # ALLOWED_HOSTSにホスト名)を入力
     # ALLOWED_HOSTS = [os.environ.get("HOST", "127.0.0.1")]
-    ALLOWED_HOSTS = [os.environ.get("HOST")]
+    ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
+    # ALLOWED_HOSTS = ["ここにパブリックIPv4アドレスを"]
     
     # 静的ファイル配信ミドルウェア、whitenoiseを使用。※順番不一致だと動かないため下記をそのままコピーする。
     MIDDLEWARE = [
@@ -279,14 +263,13 @@ if not DEBUG:
     
     # 静的ファイル(static)の存在場所を指定する。
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = '/media/'
 
     #ストレージ設定。
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
     AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
-    AWS_S3_REGION_NAME = 'ap-northeast-1'
-    AWS_S3_CUSTOM_DOMAIN = f'https://s3.ap-northeast-1.amazonaws.com/{AWS_STORAGE_BUCKET_NAME}'
-    # AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
@@ -294,9 +277,3 @@ if not DEBUG:
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-    # 静的ファイルの設定
-    # AWS_LOCATION = 'static'
-    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    # メディアファイルの設定。今回は「project」というプロジェクト名の例
-    # DEFAULT_FILE_STORAGE = 'protect.backends.MediaStorage'
