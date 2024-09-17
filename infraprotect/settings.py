@@ -232,7 +232,8 @@ if not DEBUG:
 
     # ALLOWED_HOSTSにホスト名)を入力
     # ALLOWED_HOSTS = [os.environ.get("HOST", "127.0.0.1")]
-    ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
+    # ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
+    ALLOWED_HOSTS = [os.environ.get("HOST")]
     
     # 静的ファイル配信ミドルウェア、whitenoiseを使用。※順番不一致だと動かないため下記をそのままコピーする。
     MIDDLEWARE = [
