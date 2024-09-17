@@ -262,7 +262,6 @@ if not DEBUG:
     DATABASES['default'].update(db_from_env)
     
     # 静的ファイル(static)の存在場所を指定する。
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
 
