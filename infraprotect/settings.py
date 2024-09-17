@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-uirslahosm*_udwemotzje2fvpi0+ss7e=irj&q$i_b%hp#z#-"
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = False # True：デプロイ時はFalseとする
 
 ALLOWED_HOSTS = []
@@ -118,14 +119,13 @@ USE_TZ = True
 
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
 STATIC_URL = "/static/"
-STATICFILES_DIRS    = [os.path.join(BASE_DIR, "static")]
 
 if DEBUG:
     STATICFILES_DIRS = ( # 同じくinfra/static/
         os.path.join(BASE_DIR, "/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
     )
 
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
 """
 MEDIA_URL   = "/media/"
 if DEBUG:
@@ -150,6 +150,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10 MBの例
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 """
 if not DEBUG: # 27行目のDEBUGがFalseになっていることを確認
 
@@ -232,7 +233,6 @@ if not DEBUG:
     # ALLOWED_HOSTSにホスト名)を入力
     # ALLOWED_HOSTS = [os.environ.get("HOST", "127.0.0.1")]
     ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
-    # ALLOWED_HOSTS = ["ここにパブリックIPv4アドレスを"]
     
     # 静的ファイル配信ミドルウェア、whitenoiseを使用。※順番不一致だと動かないため下記をそのままコピーする。
     MIDDLEWARE = [
@@ -262,8 +262,7 @@ if not DEBUG:
     DATABASES['default'].update(db_from_env)
     
     # 静的ファイル(static)の存在場所を指定する。
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    MEDIA_URL = '/media/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
     #ストレージ設定。
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
