@@ -16,13 +16,14 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-uirslahosm*_udwemotzje2fvpi0+ss7e=irj&q$i_b%hp#z#-"
-# SECURITY WARNING: don't run with debug turned on in production!
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False # True：デプロイ時はFalseとする
 
 ALLOWED_HOSTS = []
@@ -120,9 +121,10 @@ USE_TZ = True
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
 STATIC_URL = "/static/"
 
-if DEBUG:
-    STATICFILES_DIRS = ( # 同じくinfra/static/
-        os.path.join(BASE_DIR, "/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
+if DEBUG: # DEBUG = True のときだけ有効とする
+    STATICFILES_DIRS = (
+        # os.path.join(BASE_DIR, "infra/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
+        os.path.join(BASE_DIR, "/static/"),
     )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
@@ -165,7 +167,7 @@ if not DEBUG:
     # ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
     ALLOWED_HOSTS = [ os.environ["HOST"] ]
 
-    # 静的ファイル配信ミドルウェア、whitenoiseを使用。※順番不一致だと動かないため下記をそのままコピーする
+    # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -176,7 +178,10 @@ if not DEBUG:
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         ]
-
+    
+    # 静的ファイル(static)の存在場所を指定する。
+    STATIC_ROOT = BASE_DIR / 'static'
+    
     # Herokuデータベースを使用
     DATABASES = {
             'default': {
@@ -188,11 +193,12 @@ if not DEBUG:
                 'PORT': '5432',
                 }
             }
+    
+    #DBのアクセス設定
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
-
     # 静的ファイル(static)の存在場所を指定する
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
     #ストレージ設定
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
@@ -200,8 +206,8 @@ if not DEBUG:
     AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
 
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    # MEDIA_URL = S3_URL
+    S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+    MEDIA_URL = S3_URL
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
