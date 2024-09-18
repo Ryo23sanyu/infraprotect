@@ -157,13 +157,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 if not DEBUG:
-
     # Herokuデプロイ時に必要になるライブラリのインポート
     import django_heroku
     import dj_database_url
 
     # ALLOWED_HOSTSにホスト名を入力
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '106.73.185.6', 'infraprotect-fe1819f27e30.herokuapp.com/*', 'infraprotect-fe1819f27e30.herokuapp.com']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '106.73.185.6', 'infraprotect-fe1819f27e30.herokuapp.com']
 
     # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
@@ -185,7 +184,7 @@ if not DEBUG:
                 'USER'    : os.environ["DB_USER"],
                 'PASSWORD': os.environ["DB_PASSWORD"],
                 'HOST'    : os.environ["DB_HOST"],
-                'PORT': '5432',
+                'PORT'    : '5432',
                 }
             }
     
