@@ -177,9 +177,6 @@ if not DEBUG:
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         ]
     
-    # 静的ファイル(static)の存在場所を指定する。
-    STATIC_ROOT = BASE_DIR / 'static'
-    
     # Herokuデータベースを使用
     DATABASES = {
             'default': {
@@ -196,8 +193,8 @@ if not DEBUG:
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
     # 静的ファイル(static)の存在場所を指定する
-    # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-"""
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
     #ストレージ設定
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -209,7 +206,7 @@ if not DEBUG:
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-""" 
+    
 """
 if not DEBUG: # 27行目のDEBUGがFalseになっていることを確認
 
