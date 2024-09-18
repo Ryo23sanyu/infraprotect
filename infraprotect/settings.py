@@ -162,10 +162,8 @@ if not DEBUG:
     import django_heroku
     import dj_database_url
 
-    # ALLOWED_HOSTSにホスト名)を入力
-    # ALLOWED_HOSTS = [os.environ.get("HOST", "127.0.0.1")]
-    # ALLOWED_HOSTS = ['infraprotect-fe1819f27e30.herokuapp.com']
-    ALLOWED_HOSTS = [ os.environ["HOST"] ]
+    # ALLOWED_HOSTSにホスト名を入力
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '106.73.185.6', 'infraprotect-fe1819f27e30.herokuapp.com/*', 'infraprotect-fe1819f27e30.herokuapp.com']
 
     # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
@@ -199,7 +197,7 @@ if not DEBUG:
     DATABASES['default'].update(db_from_env)
     # 静的ファイル(static)の存在場所を指定する
     # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+"""
     #ストレージ設定
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -211,7 +209,7 @@ if not DEBUG:
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-    
+""" 
 """
 if not DEBUG: # 27行目のDEBUGがFalseになっていることを確認
 
