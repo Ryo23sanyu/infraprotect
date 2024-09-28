@@ -3897,24 +3897,3 @@ def edit_send_data(request, damage_pk, table_pk):
         return JsonResponse({"status": "success", 'current_text': current_text})
 
     return render(request, 'infra/bridge_table.html', {'report_data': report_data})
-
-# <<ファイルアップロード用関数>>
-AWS_ACCESS_KEY_ID = settings.AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY = settings.AWS_SECRET_ACCESS_KEY
-AWS_S3_REGION_NAME = settings.AWS_S3_REGION_NAME
-AWS_STORAGE_BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
-
-def upload_to_s3(article_pk, infra_id, new_file):
-    try:
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-            region_name=AWS_S3_REGION_NAME
-        )
-
-        s3_file_path = f"{article_pk}/{infra_id}/{new_file.name}"
-        s3_client.upload_fileobj(new_file, AWS_STORAGE_BUCKET_NAME, s3_file_path)
-    except Exception as e:
-        print('ファイル保存中にエラーが発生しました')
-        print(e)
