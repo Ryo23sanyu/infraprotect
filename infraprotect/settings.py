@@ -162,8 +162,10 @@ if not DEBUG:
     import dj_database_url
 
     # ALLOWED_HOSTSにホスト名を入力
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '106.73.185.6', 'infraprotect-fe1819f27e30.herokuapp.com', 'intect-a1979f80d625.herokuapp.com']
-
+    ALLOWED_HOSTS = [os.environ["HOST"]]
+    # CSRFトークンの生成、ハッシュ化に使われる。
+    SECRET_KEY = os.environ["SECRETKEY"]
+    
     # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
