@@ -62,7 +62,6 @@ python-dateutil==2.8.2
 python-magic==0.4.27
 pytweening==1.0.7
 pytz==2023.3.post1
-pywin32==306
 requests==2.31.0
 s3transfer==0.10.2
 selenium==4.16.0
