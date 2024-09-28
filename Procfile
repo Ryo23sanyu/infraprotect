@@ -1,1 +1,1 @@
-web: gunicorn intect.wsgi:application --log-file -
+web: gunicorn infraprotect.wsgi:application --log-file -
