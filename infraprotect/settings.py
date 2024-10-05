@@ -164,7 +164,7 @@ if not DEBUG:
     # ALLOWED_HOSTSにホスト名を入力
     ALLOWED_HOSTS = [os.environ["HOST"]]
     # CSRFトークンの生成、ハッシュ化に使われる。
-    SECRET_KEY = os.environ["SECRETKEY"]
+    # SECRET_KEY = os.environ["SECRETKEY"]
     
     # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
@@ -195,11 +195,20 @@ if not DEBUG:
     DATABASES['default'].update(db_from_env)
     # 静的ファイル(static)の存在場所を指定する
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+    
+    # staticファイルの参照先
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_QUERYSTRING_AUTH = True     #True必須
+    # mediaファイル保存先
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     #ストレージ設定
-    # AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-    # AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-    # AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+    # 保存先URL
+    STATIC_URL = 'https://%s.s3.ap-northeast-1.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+    AWS_LOCATION = 'static'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     # S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
