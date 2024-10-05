@@ -378,15 +378,34 @@ class DamageComment(models.Model):
         return f"{self.parts_name}　{self.damage_name}：{self.jadgement}　({self.cause})"
     
     def get_combined_text(self):
-        if self.damage_name == "腐食" and self.damage_max_lank == "c":
-            name_lank = "全体的かつ軽微な錆"
-        elif self.damage_name == "剥離・鉄筋露出" and self.damage_max_lank == "c":
-            name_lank = "剥離"
-        elif self.damage_name == "剥離・鉄筋露出" and self.damage_max_lank == "d":
-            name_lank = "鉄筋露出"
-        elif self.damage_name == "剥離・鉄筋露出" and self.damage_max_lank == "e":
-            name_lank = "鉄筋の減肉を伴う鉄筋露出"
-        elif self.damage_name.startswith("その他"):
+        if self.damage_name == "腐食": # 1：腐食
+            if self.damage_max_lank == "b":
+                name_lank = "軽微な腐食"
+            elif self.damage_max_lank == "c":
+                name_lank = "全体的かつ軽微な腐食"
+            elif self.damage_max_lank == "d":
+                name_lank = "板厚減少を伴う腐食"
+            else:
+                name_lank = "全体的かつ板厚減少を伴う腐食"           
+        elif self.damage_name == "剥離・鉄筋露出": # 7：剥離・鉄筋露出
+            if self.damage_max_lank == "c":
+                name_lank = "剥離"
+            elif self.damage_max_lank == "d":
+                name_lank = "鉄筋露出"
+            else:
+                name_lank = "鉄筋の減肉を伴う鉄筋露出"
+        elif self.damage_name == "抜け落ち": # 9：抜け落ち
+            name_lank = "コンクリート塊の抜け落ち"
+        elif self.damage_name == "うき": # 12：うき
+            name_lank = "コンクリートのうき"
+        elif self.damage_name == "変形・欠損": # 23：変形・欠損
+            if self.damage_max_lank == "c":
+                name_lank = "局部的な変形・欠損"
+            else:
+                name_lank = "著しい変形・欠損"
+        elif self.damage_name == "土砂詰まり": # 24：土砂詰まり
+            name_lank = "土砂の堆積"
+        elif self.damage_name.startswith("その他"): # 17：その他
             # 正規表現で「:」と「)」の間の文字を抽出
             match = re.search(r':(.*?)\)', self.damage_name)
             if match:
