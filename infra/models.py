@@ -398,6 +398,8 @@ class DamageComment(models.Model):
             name_lank = "コンクリート塊の抜け落ち"
         elif self.damage_name == "うき": # 12：うき
             name_lank = "コンクリートのうき"
+        elif self.damage_name == "漏水・滞水": # 20：漏水・滞水
+            name_lank = "本来の排水機能によらない漏水・構造物に支障を及ぼす可能性のある滞水"
         elif self.damage_name == "変形・欠損": # 23：変形・欠損
             if self.damage_max_lank == "c":
                 name_lank = "局部的な変形・欠損"
@@ -413,24 +415,24 @@ class DamageComment(models.Model):
             else:
                 name_lank = ""
         else:
-            name_lank = ""
-            
+            name_lank = "損傷"
+        # 判定区分に対する定型文
         if self.jadgement == "B":
             jadgement_text = "状況に応じて補修を行う必要がある。"
         elif self.jadgement == "M":
             jadgement_text = "維持工事で対応する必要がある。"
         elif self.jadgement == "C1":
-            jadgement_text = "予防保全の観点から，速やかに補修等を行う必要がある。"
+            jadgement_text = "予防保全の観点から、速やかに補修等を行う必要がある。"
         elif self.jadgement == "C2":
-            jadgement_text = "橋梁構造の安全性の観点から，速やかに補修等を行う必要がある。"
+            jadgement_text = "橋梁構造の安全性の観点から、速やかに補修等を行う必要がある。"
         elif self.jadgement == "S1":
             jadgement_text = "詳細調査の必要がある。"
         elif self.jadgement == "S2":
             jadgement_text = "追跡調査の必要がある。"
         elif self.jadgement == "E1":
-            jadgement_text = "橋梁構造の安全性の観点から，緊急対応の必要がある。"
+            jadgement_text = "橋梁構造の安全性の観点から、緊急対応の必要がある。"
         elif self.jadgement == "E2":
-            jadgement_text = "その他，緊急対応の必要がある。"
+            jadgement_text = "その他、緊急対応の必要がある。"
         else:
             jadgement_text = ""
         return f"{self.comment_parts_name}に{name_lank}が見られる。{jadgement_text}"
