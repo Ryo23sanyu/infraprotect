@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "infra.apps.InfraConfig",
-    # "upload", # moduleエラーのため、コメントアウト
+    "infra", # アプリ名
     "storages", # 追加
 ]
 
