@@ -38,8 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
-    "infra.apps.InfraConfig",
-    "infra", # アプリ名
+    "infra.apps.InfraConfig", # アプリ名
     "storages", # 追加
 ]
 
