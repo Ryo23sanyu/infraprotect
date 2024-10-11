@@ -139,13 +139,13 @@ class Infra(models.Model):
 
 # << ファイルアップロード >>
 class UploadedFile(models.Model):
-    file = models.FileField(upload_to='uploads/')
+    file = models.FileField(upload_to='dxf/')
 
 # << 各インフラにdxfを紐付け >>
 class Table(models.Model):
     infra = models.ForeignKey(Infra, verbose_name="橋梁名", on_delete=models.CASCADE) # ForeignKeyフィールドによってInfraとのリレーションシップを定義
     # dxf = models.FileField(verbose_name="dxfファイル", upload_to="infra/table/dxf/") # infraを作成するときに登録するdxfファイル用
-    dxf = models.FileField(verbose_name="dxfファイル", upload_to="dxf")
+    dxf = models.FileField(verbose_name="dxfファイル", upload_to="dxf/")
     article = models.ForeignKey(Article, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
         return f"{self.infra}：{self.article}（{self.dxf}）"
