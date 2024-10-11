@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "infra.apps.InfraConfig", # アプリ名
-    "storages", # 追加
+    "django_s3_storage", # 追加
 ]
 
 MIDDLEWARE = [
@@ -119,7 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
-STATIC_URL = "static/" # "/static/"
+STATIC_URL = "/static/"
 
 if DEBUG: # DEBUG = True のときだけ有効とする
     STATICFILES_DIRS = (
@@ -148,7 +148,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = 'list-article'#'index'
 LOGOUT_REDIRECT_URL = '/'
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10 MBの例
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10 # 10 MBの例
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
