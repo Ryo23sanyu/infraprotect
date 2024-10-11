@@ -119,7 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
-STATIC_URL = "/static/"
+STATIC_URL = "static/" # "/static/"
 
 if DEBUG: # DEBUG = True のときだけ有効とする
     STATICFILES_DIRS = (
@@ -162,9 +162,9 @@ if not DEBUG:
     import dj_database_url
 
     # ALLOWED_HOSTSにホスト名を入力
-    ALLOWED_HOSTS = [os.environ["HOST"]]
+    ALLOWED_HOSTS = [ os.environ["HOST"] ]
     # CSRFトークンの生成、ハッシュ化に使われる。
-    # SECRET_KEY = os.environ["SECRETKEY"]
+    SECRET_KEY = os.environ["SECRETKEY"]
     
     # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
     MIDDLEWARE = [
@@ -194,7 +194,8 @@ if not DEBUG:
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
     # 静的ファイル(static)の存在場所を指定する
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    STATIC_ROOT = BASE_DIR / 'static'
     
     # # staticファイルの参照先
     # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

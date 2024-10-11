@@ -3526,11 +3526,13 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
             #<< ◆損傷メモの作成◆ >>
             replacement_patterns = {
                 "①腐食(小小)-b": "腐食", # 1
-                "①腐食(小大)-c": "拡がりのある腐食",
+                "①腐食(小大)-c": "全体的な腐食",
                 "①腐食(大小)-d": "板厚減少を伴う腐食",
-                "①腐食(大大)-e": "板厚減少を伴う拡がりのある腐食",
-                "③ゆるみ・脱落-c": "ボルト、ナットにゆるみ・脱落（●本中●本）",
-                "③ゆるみ・脱落-e": "ボルト、ナットにゆるみ・脱落（●本中●本）", # 3
+                "①腐食(大大)-e": "全体的に板厚減少を伴う腐食",
+                "②亀裂-c": "塗膜割れ", # 2
+                "②亀裂-e": "長さのある塗膜割れ・幅0.0mmの亀裂",
+                "③ゆるみ・脱落-c": "ボルト・ナットにゆるみ、脱落(●本中●本)", # 3
+                "③ゆるみ・脱落-e": "ボルト・ナットにゆるみ、脱落(●本中●本)",
                 "④破断-e": "鋼材の破断", # 4
                 "⑤防食機能の劣化(分類1)-e": "点錆", # 5
                 "⑥ひびわれ(小小)-b": "最大幅0.0mmのひびわれ", # 6
@@ -3546,15 +3548,15 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
                 "⑧漏水・遊離石灰-d": "遊離石灰",
                 "⑧漏水・遊離石灰-e": "著しい遊離石灰・泥や錆汁の混入を伴う漏水",
                 "⑨抜け落ち-e": "コンクリート塊の抜け落ち", # 9
-                "⑪床版ひびわれ-b": "最大幅0.0mmの1方向ひびわれ",
+                "⑪床版ひびわれ-b": "最大幅0.0mmの1方向ひびわれ", # 11
                 "⑪床版ひびわれ-c": "最大幅0.0mmの1方向ひびわれ",
                 "⑪床版ひびわれ-d": "最大幅0.0mmの1方向ひびわれ",
-                "⑪床版ひびわれ-e": "最大幅0.0mmの角落ちを伴う1方向ひびわれ", # 11
+                "⑪床版ひびわれ-e": "最大幅0.0mmの角落ちを伴う1方向ひびわれ",
                 "⑫うき-e": "コンクリートのうき", # 12
-                "⑮舗装の異常-c": "最大幅0.0mmのひびわれ",
-                "⑮舗装の異常-e": "最大幅0.0mmのひびわれ・舗装の土砂化", # 15
-                "⑯定着部の異常-c": "定着部の損傷。",
-                "⑯定着部の異常(分類2)-e": "定着部の著しい損傷", # 16
+                "⑮舗装の異常-c": "最大幅0.0mmのひびわれ", # 15
+                "⑮舗装の異常-e": "最大幅0.0mmのひびわれ・舗装の土砂化",
+                "⑯定着部の異常-c": "定着部の損傷", # 16
+                "⑯定着部の異常(分類2)-e": "定着部の著しい損傷",
                 "⑳漏水・滞水-e": "漏水・滞水", # 20
                 "㉓変形・欠損-c": "変形・欠損", # 23
                 "㉓変形・欠損-e": "著しい変形・欠損",
@@ -3565,9 +3567,9 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
                 described_list = []
                 
                 for damage in unified_request_list:
-                    if damage in replacement_patterns:
+                    if damage in replacement_patterns: # 辞書に一致する場合は登録文字を表示
                         described_list.append(replacement_patterns[damage])
-                    elif damage.startswith('⑰'):
+                    elif damage.startswith('⑰'): # 17の場合はカッコの中を表示
                         match = re.search(r'(?<=:)(.*?)(?=\)-e)', damage)
                         if match:
                             described_list.append(match.group(1))
