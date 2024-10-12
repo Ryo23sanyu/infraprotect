@@ -1,7 +1,7 @@
 from django.urls import path
 from .import views
 from .views import file_upload, file_upload_success, get_subdirectories, get_symbol, serve_image
-from .views import photo_list, photo_upload, selected_photos, panorama_list
+from .views import photo_list, selected_photos, panorama_list
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -55,15 +55,15 @@ urlpatterns = [
     path('update_full_report_data/<int:pk>/', views.update_full_report_data, name='update_full_report_data'), # 損傷写真帳のリアルタイム保存
     
     # << 未完成 >>
-    path('photos/', views.photo_list, name='photo_list'),
-    path('photos/upload/', views.photo_upload, name='photo_upload'),
-    path('photos/selected/', views.selected_photos, name='selected_photos'),
-    path('panorama/list/', views.panorama_list, name='panorama_list'),
-    path('images/', views.image_list, name='image_list'),# 全景写真
-    path('photo/', views.display_photo, name='photo'),# 全景写真のアップロード
-    path('change-photo/', views.change_photo, name='change_photo'),# 全景写真の変更
-    path('serve-image/<str:file_path>/', serve_image, name='serve_image'), # 写真をアップロードせずに表示
-    path('article/<int:article_pk>/infra/<int:pk>/bridge-table/upload/', views.upload_picture, name='upload-picture'),
+    # path('photos/', views.photo_list, name='photo_list'),
+    # path('photos/upload/', views.photo_upload, name='photo_upload'),
+    # path('photos/selected/', views.selected_photos, name='selected_photos'),
+    # path('panorama/list/', views.panorama_list, name='panorama_list'),
+    # path('images/', views.image_list, name='image_list'),# 全景写真
+    # path('photo/', views.display_photo, name='photo'),# 全景写真のアップロード
+    # path('change-photo/', views.change_photo, name='change_photo'),# 全景写真の変更
+    # path('serve-image/<str:file_path>/', serve_image, name='serve_image'), # 写真をアップロードせずに表示
+    # path('article/<int:article_pk>/infra/<int:pk>/bridge-table/upload/', views.upload_picture, name='upload-picture'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
