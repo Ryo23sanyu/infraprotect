@@ -26,14 +26,14 @@ from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as OpenpyxlImage
 from PIL import Image as PILImage
 # django内からインポート
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, JsonResponse, HttpResponseServerError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import FileSystemStorage
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.views.decorators.csrf import csrf_protect, csrf_exempt, requires_csrf_token
 from django.db import transaction, IntegrityError
 from django.db.models import Q, Value, IntegerField, Case, When
 from django.db.models.functions import Substr, Cast, Length
@@ -47,6 +47,14 @@ from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageComment
 from urllib.parse import quote, unquote
 from ezdxf.enums import TextEntityAlignment
 import logging
+
+# 500エラーの際に詳細を表示
+@requires_csrf_token
+def my_customized_server_error(request, template_name='500.html'):
+    import sys
+    from django.views import debug
+    error_html = debug.technical_500_response(request, *sys.exc_info()).content
+    return HttpResponseServerError(error_html)
 
 class ListInfraView(LoginRequiredMixin, ListView):
     template_name = 'infra/infra_list.html'

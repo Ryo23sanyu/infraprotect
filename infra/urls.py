@@ -8,6 +8,8 @@ from django.conf.urls.static import static
 # urlパスの設定は何を意味しているのか、ぱっと見でわかるように作成する
 # 例：article/<int:article_pk>/infra/<int:pk>/update/（article〇番のinfra△番の更新ページ）
 #                   ↑ article の id       ↑ infra の id
+handler500 = views.my_customized_server_error
+
 urlpatterns = [
     # << 初期ページ >>
     path('', views.index_view, name='index'),
