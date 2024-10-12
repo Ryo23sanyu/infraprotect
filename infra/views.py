@@ -15,6 +15,7 @@ from shutil import copytree
 from django.db import IntegrityError
 import openpyxl
 import tempfile
+import boto3
 # サードパーティー製モジュール
 import ezdxf
 import pandas as pd
@@ -40,7 +41,6 @@ from django.db.models.functions import Substr, Cast, Length
 from django.core.files.base import ContentFile
 from django.db.models import Case, When, IntegerField, F
 from django.db.models.functions import Cast, Replace, Substr, Length
-import boto3
 from infraprotect import settings
 from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
 from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm

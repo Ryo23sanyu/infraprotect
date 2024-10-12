@@ -166,7 +166,7 @@ if not DEBUG:
     # CSRFトークンの生成、ハッシュ化に使われる。
     SECRET_KEY = os.environ["SECRETKEY"]
     
-    # 静的ファイル配信ミドルウェア、whitenoiseを使用　※順番不一致だと動かない
+    # 静的ファイル配信ミドルウェア（whitenoise）を使用　※順番不一致だと動かない
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
