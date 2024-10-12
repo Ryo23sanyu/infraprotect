@@ -448,7 +448,7 @@ def panorama_upload(request):
 def census_view(request):
     form = CensusForm()
     return render(request, 'infra_detail.html', {'form': form})
-
+"""
 # << 全景写真の表示 >>
 def image_list(request):
     # 特定のディレクトリ内の全てのファイルパスをリストで取得したい場合はglobを使うと良い。
@@ -533,7 +533,7 @@ def change_photo(request):
         form = UploadForm()  # GETリクエストの場合、空のフォームを表示
 
     return render(request, 'upload_photo.html', {'form': form})
-
+"""
 # << 損傷写真帳の作成 >>
 def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.htmlに表示
     context = {}
