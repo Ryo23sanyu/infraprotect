@@ -325,7 +325,7 @@ def file_upload(request, article_pk, pk):
     logger.debug(f"article:{article} ({article.id})")
     
     if request.method == 'POST':
-                #                  ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
+        #                    ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
         copied          = request.POST.copy()
 
         # ここで Infraのid(pk)を指定する。
@@ -336,7 +336,6 @@ def file_upload(request, article_pk, pk):
         form = TableForm(copied, request.FILES)
         
         # 既存のオブジェクトに対して新しいファイルを上書きする処理
-        
         if Table.objects.filter(infra=infra.id, article=article.id).first():
             obj = Table.objects.get(infra=infra.id, article=article.id)
             form = TableForm(copied, request.FILES, instance=obj)
@@ -2215,7 +2214,7 @@ def custom_sort_key(record):
 
 # << 指定したInfra(pk)に紐づくTableのエクセルの出力 >>
 def excel_output(request, article_pk, pk):
-    
+    bridge_name = ""
     # 元のファイルのパス（例: `base.xlsm`）
     original_file_path = 'base.xlsm'
     # エクセルファイルを読み込む
@@ -2225,7 +2224,8 @@ def excel_output(request, article_pk, pk):
     no01_records = Infra.objects.filter(id=pk, article=article_pk)
     ws = wb['その１']
     for record in no01_records:
-        print(record.title)
+        bridge_name = record.title
+        print(bridge_name)
         ws[f'F6'] = record.title # 〇〇橋
         ws[f'O10'] = record.橋長
         ws[f'BC5'] = record.橋梁コード
@@ -2756,7 +2756,9 @@ def excel_output(request, article_pk, pk):
     # 現在の日時を取得してファイル名に追加
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     # 新しいファイル名の生成
-    new_filename = f"Macro{timestamp}_{original_file_path}"
+    new_filename = f"{bridge_name}(作成：{timestamp}).xlsm"# _{original_file_path}"
+    # サンプル橋(作成：20241015_114539)_base.xlsm
+    
     # デスクトップのパス
     # desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
     # 保存するファイルのフルパス

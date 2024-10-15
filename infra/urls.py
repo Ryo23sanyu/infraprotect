@@ -63,7 +63,7 @@ urlpatterns = [
     # path('photo/', views.display_photo, name='photo'),# 全景写真のアップロード
     # path('change-photo/', views.change_photo, name='change_photo'),# 全景写真の変更
     # path('serve-image/<str:file_path>/', serve_image, name='serve_image'), # 写真をアップロードせずに表示
-    # path('article/<int:article_pk>/infra/<int:pk>/bridge-table/upload/', views.upload_picture, name='upload-picture'),
+    path('article/<int:article_pk>/infra/<int:pk>/bridge-table/upload/', views.upload_picture, name='upload-picture'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
