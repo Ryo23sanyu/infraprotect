@@ -194,98 +194,20 @@ if not DEBUG:
     #DBのアクセス設定
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
+    
     # 静的ファイル(static)の存在場所を指定する
     # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_ROOT = BASE_DIR / 'static'
     
-    # # staticファイルの参照先
-    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # AWS_QUERYSTRING_AUTH = True     #True必須
-    # # mediaファイル保存先
-    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # #ストレージ設定
+    #ストレージ設定
     AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
     AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
     AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
-    # # 保存先URL
-    # STATIC_URL = 'https://%s.s3.ap-northeast-1.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    # AWS_LOCATION = 'static'
-
+    # mediaファイル保存先
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # 保存先URL
     S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
     MEDIA_URL = S3_URL
-
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_DEFAULT_ACL = None
-    
-"""
-if not DEBUG: # 27行目のDEBUGがFalseになっていることを確認
-
-    #INSTALLED_APPSにcloudinaryの追加
-    INSTALLED_APPS.append('cloudinary')
-    INSTALLED_APPS.append('cloudinary_storage')
-
-    # ALLOWED_HOSTSに( Herokuのアプリのドメイン名 )を入力
-    # os.environ は環境変数。後で、Herokuの設定に追加をする。
-    ALLOWED_HOSTS = [ os.environ["HOST"] ]
-
-    # CSRFトークンの生成、ハッシュ化に使われる。
-    SECRET_KEY = os.environ["SECRETKEY"]
-    
-    # 静的ファイル配信ミドルウェア、whitenoiseを使用。※ 順番不一致だと動かないため下記をそのままコピーする。
-    MIDDLEWARE = [ 
-        'django.middleware.security.SecurityMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        ]
-
-    # STATICファイルの場所指定
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-    # STATIC_ROOT = BASE_DIR / 'static'
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    
-    # DBの設定(HerokuPostgres は PostgreSQLなので、)
-    # Heroku＞Heroku Postgres＞Settings＞View Credentials
-    # 参考サイト：https://noauto-nolife.com/post/django-deploy-heroku/
-    DATABASES = { 
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME'    : os.environ["DB_NAME"],
-                'USER'    : os.environ["DB_USER"],
-                'PASSWORD': os.environ["DB_PASSWORD"],
-                'HOST'    : os.environ["DB_HOST"],
-                'PORT': '5432',
-                }
-            }
-
-    #DBのアクセス設定
-    import dj_database_url
-
-    db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
-    DATABASES['default'].update(db_from_env)
-    
-
-    #cloudinaryの設定
-    CLOUDINARY_STORAGE = { 
-            'CLOUD_NAME': os.environ["CLOUD_NAME"], 
-            'API_KEY'   : os.environ["API_KEY"], 
-            'API_SECRET': os.environ["API_SECRET"],
-            "SECURE"    : True,
-            }
-    
-    # cloudinary://435863325477269:N337D13Yjy6-J0K8K7d_IgFU_-Y@hslrqdyny
-    # cloudinary://[API_KEY]      :[API_SECRET]               @[CLOUD_NAME]
-    #これは画像だけ(上限20MB)
-    #DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-    #これは動画だけ(上限100MB)
-    #DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.VideoMediaCloudinaryStorage'
-
-    #これで全てのファイルがアップロード可能(上限20MB。ビュー側でアップロードファイル制限するなら基本これでいい)
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
-"""
+    # AWSの設定
+    AWS_S3_FILE_OVERWRITE = False # 同じファイル名が存在した場合、上書きを行う(デフォルト:True)
+    AWS_DEFAULT_ACL = None # アップロードされたオブジェクトのアクセスコントロールリストを指定(推奨 None:S3バケットのデフォルトACLが適用)

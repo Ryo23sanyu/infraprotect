@@ -278,23 +278,7 @@ class UpdateArticleView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('list-article')
 
 # << ファイルのアップロード・各infraに紐付け >>
-logger = logging.getLogger(__name__)
-
-def upload_to_s3(file_obj, bucket_name, file_name):
-    # S3クライアントの作成
-    s3 = boto3.client('s3',
-                      aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-
-    try:
-        # S3にファイルをアップロード
-        s3.upload_fileobj(file_obj, bucket_name, file_name)
-        logger.info(f"S3にファイルをアップロードしました: {file_name}")
-        return True
-    except Exception as e:
-        logger.error(f"S3へのアップロードに失敗しました: {e}")
-        return False
-    
+logger = logging.getLogger(__name__)    
 def file_upload(request, article_pk, pk):
     print("アップロードID確認")
     print(f"橋梁番号:{pk}")
@@ -342,6 +326,7 @@ def file_upload(request, article_pk, pk):
         
         if form.is_valid():
             form.save()
+            print("True-action")
             # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
             
         """
