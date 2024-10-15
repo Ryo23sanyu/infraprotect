@@ -124,8 +124,8 @@ STATIC_URL = "/static/"
 
 if DEBUG: # DEBUG = True のときだけ有効とする
     STATICFILES_DIRS = (
-        # os.path.join(BASE_DIR, "infra/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
-        os.path.join(BASE_DIR, "/static/"),
+        os.path.join(BASE_DIR, "infra/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
+        # os.path.join(BASE_DIR, "/static/"),
     )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
