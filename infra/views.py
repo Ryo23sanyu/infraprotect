@@ -15,7 +15,7 @@ from shutil import copytree
 from django.db import IntegrityError
 import openpyxl
 import tempfile
-# import boto3
+import boto3
 # サードパーティー製モジュール
 import ezdxf
 import pandas as pd
