@@ -15,7 +15,7 @@ from shutil import copytree
 from django.db import IntegrityError
 import openpyxl
 import tempfile
-import boto3
+# import boto3
 # サードパーティー製モジュール
 import ezdxf
 import pandas as pd
@@ -278,7 +278,7 @@ class UpdateArticleView(LoginRequiredMixin, UpdateView):
     model = Article
     fields = ('案件名', '土木事務所', '対象数', '担当者名', 'その他', 'ファイルパス')
     success_url = reverse_lazy('list-article')
-"""
+
 # << ファイルのアップロード・各infraに紐付け >>
 logger = logging.getLogger(__name__)
 def file_upload(request, article_pk, pk):
@@ -296,6 +296,8 @@ def file_upload(request, article_pk, pk):
     try:
         infra = Infra.objects.get(id=pk)
         article = infra.article
+        print(f'infra:{infra}')
+        print(f'articl:{article}')
     except Infra.DoesNotExist:
         logger.error(f"インフラ {pk} が存在しません")
         return render(request, 'infra/file_upload.html', {
@@ -328,7 +330,7 @@ def file_upload(request, article_pk, pk):
         if form.is_valid():
             form.save()
             return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
-        # this
+        """
             new_file = request.FILES['dxf']
             # ファイル拡張子を取得
             _, file_extension = os.path.splitext(new_file.name)
@@ -361,7 +363,7 @@ def file_upload(request, article_pk, pk):
                 })
         else:
             logger.error(f"Form validation failed: {form.errors}")
-        # this
+        """
     else:
         form = TableForm()
     
@@ -406,10 +408,6 @@ def file_upload(request, article_pk, pk):
                     print(f"Uploading photo: {file_path}")
     
     return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
-"""
-
-def file_upload(request):
-    return render(request, 'how_to_use.html')
 
 def file_upload_success(request):
     return render(request, 'infra/file_upload_success.html')

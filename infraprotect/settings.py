@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "infra.apps.InfraConfig", # アプリ名
-    "storages", # 追加
+    # "storages", # 追加
 ]
 
 MIDDLEWARE = [
