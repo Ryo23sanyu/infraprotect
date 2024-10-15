@@ -341,16 +341,9 @@ def file_upload(request, article_pk, pk):
             obj = Table.objects.get(infra=infra.id, article=article.id)
             form = TableForm(copied, request.FILES, instance=obj)
         
-        # if form.is_valid():
-        #     form.save()
-            # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
         if form.is_valid():
-            table_instance = form.save()
-            # S3にファイルをアップロード
-            file_obj = request.FILES[copied] # アップロードするファイルのフィールド名
-            bucket_name = settings.AWS_STORAGE_BUCKET_NAME # S3バケット名
-            file_name = f"{table_instance.id}/{file_obj.name}" # 保存するファイル名
-            upload_to_s3(file_obj, bucket_name, file_name)
+            form.save()
+            # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
             
         """
             new_file = request.FILES['dxf']
