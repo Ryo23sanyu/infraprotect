@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts.apps.AccountsConfig",
     "infra.apps.InfraConfig", # アプリ名
-    "storages", # 追加
+    #"storages", # 追加
 ]
 
 MIDDLEWARE = [
@@ -156,6 +156,37 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
+# DEBUG=False時でもログを表示
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"simple": {"format": "%(asctime)s [%(levelname)s] %(message)s"}},
+    "handlers": {
+        "info": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        },
+        "warning": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "stream": "ext://sys.stderr",
+        },
+        "error": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "stream": "ext://sys.stderr",
+        },
+    },
+    "root": {
+        "handlers": ["info", "warning", "error"],
+        "level": "INFO",
+    },
+}
 
 if not DEBUG:
     # Herokuデプロイ時に必要になるライブラリのインポート

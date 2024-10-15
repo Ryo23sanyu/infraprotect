@@ -15,7 +15,7 @@ from shutil import copytree
 from django.db import IntegrityError
 import openpyxl
 import tempfile
-import boto3
+# import boto3
 # サードパーティー製モジュール
 import ezdxf
 import pandas as pd
@@ -33,13 +33,11 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import FileSystemStorage
+from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
 from django.views.decorators.csrf import csrf_protect, csrf_exempt, requires_csrf_token
 from django.db import transaction, IntegrityError
-from django.db.models import Q, Value, IntegerField, Case, When
-from django.db.models.functions import Substr, Cast, Length
-from django.core.files.base import ContentFile
-from django.db.models import Case, When, IntegerField, F
+from django.db.models import Q, Value, IntegerField, Case, When, F
 from django.db.models.functions import Cast, Replace, Substr, Length
 from infraprotect import settings
 from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
@@ -329,7 +327,7 @@ def file_upload(request, article_pk, pk):
         
         if form.is_valid():
             form.save()
-            return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
+            # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
         """
             new_file = request.FILES['dxf']
             # ファイル拡張子を取得
@@ -366,7 +364,7 @@ def file_upload(request, article_pk, pk):
         """
     else:
         form = TableForm()
-    
+    """
     # << 写真ファイルの自動アップロード >>
     # 写真のアップロード先フォルダ（MEDIA_ROOT）
     media_root = '/path/to/media/root'
@@ -406,7 +404,7 @@ def file_upload(request, article_pk, pk):
                     file_path = os.path.join(root, file)
                     # アップロード処理の実装
                     print(f"Uploading photo: {file_path}")
-    
+    """
     return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
 
 def file_upload_success(request):
