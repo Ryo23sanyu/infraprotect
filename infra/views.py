@@ -328,84 +328,9 @@ def file_upload(request, article_pk, pk):
             form.save()
             print("True-action")
             # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
-            
-        """
-            new_file = request.FILES['dxf']
-            # ファイル拡張子を取得
-            _, file_extension = os.path.splitext(new_file.name)
-            
-            if file_extension.lower() == '.dxf':
-                try:
-                    dummy_file_path = "CAD20240906.dxf"
-
-                    upload_to_s3(article_pk, infra.id, dummy_file_path)
-                    # upload_to_s3(article_pk, infra.id, new_file)
-
-                    form.save()
-                    logger.info("Form saved successfully.")
-                    return redirect('file_upload_success')
-                except Exception as e:
-                    logger.error(f"ファイル保存中にエラーが発生しました: {e}")
-                    return render(request, 'infra/file_upload.html', {
-                        'error': 'ファイル保存中にエラーが発生しました',
-                        'form': form,
-                        'article_pk': article_pk,
-                        'pk': pk,
-                    })
-            else:
-                logger.error("Unsupported file extension.")
-                return render(request, 'infra/file_upload.html', {
-                    'error': 'Unsupported file extension.',
-                    'form': form,
-                    'article_pk': article_pk,
-                    'pk': pk,
-                })
-        else:
-            logger.error(f"Form validation failed: {form.errors}")
-        """
     else:
         form = TableForm()
-    """
-    # << 写真ファイルの自動アップロード >>
-    # 写真のアップロード先フォルダ（MEDIA_ROOT）
-    media_root = '/path/to/media/root'
-    # Articleからルートフォルダパスを取得
-    root_folder_path = article.ファイルパス
-    # フォルダパスが存在しない場合は処理を終了
-    if not os.path.exists(root_folder_path):
-        print(f"Root folder '{root_folder_path}' does not exist.")
-        return
 
-    # Infraクラスのtitleリストを取得
-    infra_titles = [infra.title for infra in Infra.objects.all()]
-
-    # 対象となるサブフォルダを特定
-    target_folders = [f.path for f in os.scandir(root_folder_path) if f.is_dir() and any(title in f.name for title in infra_titles)]
-
-    # 写真の拡張子
-    IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
-
-    # 対象フォルダ内の写真ファイルをフィルタリングし、アップロード処理を行う
-    for folder in target_folders:
-        # Create destination folder path
-        destination_folder = os.path.join(media_root, os.path.basename(folder))
-
-        # 写真ファイルのみを対象とするフィルタリングルール
-        def filter_photos(source, names):
-            return [name for name in names if not any(name.lower().endswith(ext) for ext in IMAGE_EXTENSIONS)]
-
-        # 結果のフォルダごとコピー（写真ファイルのみコピー）
-        copytree(folder, destination_folder, ignore=filter_photos)
-
-        # アップロード例：ここでアップロードの実装を行う
-        # 例えば、すべての写真をクラウドストレージにアップロードする
-        for root, _, files in os.walk(destination_folder):
-            for file in files:
-                if any(file.lower().endswith(ext) for ext in IMAGE_EXTENSIONS):
-                    file_path = os.path.join(root, file)
-                    # アップロード処理の実装
-                    print(f"Uploading photo: {file_path}")
-    """
     return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
 
 def file_upload_success(request):
