@@ -122,13 +122,14 @@ USE_TZ = True
 # STATIC_URL = "infra/static/"# infra/static/以降のファイルパスをviews.pyで指定
 STATIC_URL = "/static/"
 
-if DEBUG: # DEBUG = True のときだけ有効とする
-    STATICFILES_DIRS = (
-        os.path.join(BASE_DIR, "infra/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
+if DEBUG:
+    STATICFILES_DIRS = [ BASE_DIR / "infra" / "static" ]
+    # STATICFILES_DIRS = (
+        # os.path.join(BASE_DIR, "infra/static/"), #「C:\work\django\myproject\myvenv\infraprotect\infra\static\」と同じ
         # os.path.join(BASE_DIR, "/static/"),
-    )
+    # )
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #「C:\work\django\myproject\myvenv\infraprotect\」と同じ
 """
 MEDIA_URL   = "/media/"
 if DEBUG:
@@ -152,9 +153,7 @@ LOGOUT_REDIRECT_URL = '/'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10 # 10 MBの例
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+# BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 if not DEBUG:
@@ -198,18 +197,16 @@ if not DEBUG:
     # 静的ファイル(static)の存在場所を指定する
     # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     STATIC_ROOT = BASE_DIR / 'static'
-    
-    #ストレージ設定
-    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
-    AWS_S3_REGION_NAME = 'ap-northeast-1'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    # mediaファイル保存先
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # 保存先URL
-    S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    MEDIA_URL = S3_URL
-    # AWSの設定
-    AWS_S3_FILE_OVERWRITE = False # 同じファイル名が存在した場合、上書きを行う(デフォルト:True)
-    AWS_DEFAULT_ACL = None # アップロードされたオブジェクトのアクセスコントロールリストを指定(推奨 None:S3バケットのデフォルトACLが適用)
+
+#ストレージ設定
+AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+# mediaファイル保存先
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# 保存先URL
+S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME # http://(AWS_STORAGE_BUCKET_NAME).s3.amazonaws.com/
+MEDIA_URL = S3_URL
+# AWSの設定
+AWS_S3_FILE_OVERWRITE = False # 同じファイル名が存在した場合、上書きを行う(デフォルト:True)
+AWS_DEFAULT_ACL = None # アップロードされたオブジェクトのアクセスコントロールリストを指定(推奨 None:S3バケットのデフォルトACLが適用)
