@@ -15,7 +15,7 @@ from shutil import copytree
 from django.db import IntegrityError
 import openpyxl
 import tempfile
-import boto3
+# import boto3
 # サードパーティー製モジュール
 import ezdxf
 import pandas as pd
@@ -323,7 +323,7 @@ def file_upload(request, article_pk, pk):
     else:
         print(form.errors)
 
-    # return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
+    return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
 
 def file_upload_success(request):
     return render(request, 'infra/file_upload_success.html')
