@@ -280,14 +280,22 @@ class UpdateArticleView(LoginRequiredMixin, UpdateView):
 # << ファイルのアップロード・各infraに紐付け >>
 logger = logging.getLogger(__name__)    
 def file_upload(request, article_pk, pk):
+    print("アップロードID確認")
     print(f"橋梁番号:{pk}")
     print(f"案件番号:{article_pk}")
+    infra = Infra.objects.filter(id=pk).first()
+    print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
+    article = infra.article
+    print(f"article:{article}({article.id})") # お試し(2)
+    logger.debug("アップロードID確認")
+    logger.debug(f"橋梁番号:{pk}")
+    logger.debug(f"案件番号:{article_pk}")
     
     try:
         infra = Infra.objects.get(id=pk)
         article = infra.article
-        print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
-        print(f"article:{article}({article.id})") # お試し(2)
+        print(f'infra:{infra}')
+        print(f'articl:{article}')
     except Infra.DoesNotExist:
         logger.error(f"インフラ {pk} が存在しません")
         return render(request, 'infra/file_upload.html', {
@@ -297,9 +305,12 @@ def file_upload(request, article_pk, pk):
             'pk': pk
         })
     
+    logger.debug(f"Infra:{infra} ({infra.id})")
+    logger.debug(f"article:{article} ({article.id})")
+    
     if request.method == 'POST':
-        #            ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
-        copied  = request.POST.copy()
+        #                    ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
+        copied          = request.POST.copy()
 
         # ここで Infraのid(pk)を指定する。
         copied["infra"] = pk
@@ -307,21 +318,18 @@ def file_upload(request, article_pk, pk):
         
         # バリデーション
         form = TableForm(copied, request.FILES)
-        # 編集する場合
-        obj = Table.objects.filter(infra=infra, article=article).first()
-
+        
         # 既存のオブジェクトに対して新しいファイルを上書きする処理
-        if object:
+        if Table.objects.filter(infra=infra.id, article=article.id).first():
+            obj = Table.objects.get(infra=infra.id, article=article.id)
             form = TableForm(copied, request.FILES, instance=obj)
-        else:
-            form = TableForm(copied, request.FILES)
-            
+        
         if form.is_valid():
             form.save()
             print("True-action")
             # return redirect(reverse('bridge-table', kwargs={'article_pk': article_pk, 'pk': pk}))
     else:
-        print(form.errors)
+        form = TableForm()
 
     return render(request, 'infra/file_upload.html', {'object': infra, 'form': form, 'article_pk': article_pk, 'pk': pk})
 
