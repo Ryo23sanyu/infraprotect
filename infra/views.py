@@ -283,19 +283,17 @@ def file_upload(request, article_pk, pk):
     print("アップロードID確認")
     print(f"橋梁番号:{pk}")
     print(f"案件番号:{article_pk}")
-    infra = Infra.objects.filter(id=pk).first()
-    print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
-    article = infra.article
-    print(f"article:{article}({article.id})") # お試し(2)
-    logger.debug("アップロードID確認")
-    logger.debug(f"橋梁番号:{pk}")
-    logger.debug(f"案件番号:{article_pk}")
-    
     try:
-        infra = Infra.objects.get(id=pk)
+        infra = Infra.objects.filter(id=pk).first()
         article = infra.article
-        print(f'infra:{infra}')
-        print(f'articl:{article}')
+        print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
+        print(f"article:{article}({article.id})") # お試し(2)
+    
+    # try:
+    #     infra = Infra.objects.get(id=pk)
+    #     article = infra.article
+    #     print(f'infra:{infra}')
+    #     print(f'articl:{article}')
     except Infra.DoesNotExist:
         logger.error(f"インフラ {pk} が存在しません")
         return render(request, 'infra/file_upload.html', {
@@ -305,12 +303,9 @@ def file_upload(request, article_pk, pk):
             'pk': pk
         })
     
-    logger.debug(f"Infra:{infra} ({infra.id})")
-    logger.debug(f"article:{article} ({article.id})")
-    
     if request.method == 'POST':
         #                    ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
-        copied          = request.POST.copy()
+        copied = request.POST.copy()
 
         # ここで Infraのid(pk)を指定する。
         copied["infra"] = pk
