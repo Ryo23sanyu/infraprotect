@@ -305,7 +305,7 @@ def file_upload(request, article_pk, pk):
     
     if request.method == 'POST':
         #                    ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
-        copied = request.POST.copy()
+        copied = request.POST# .copy()
 
         # ここで Infraのid(pk)を指定する。
         copied["infra"] = pk
