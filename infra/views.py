@@ -3748,7 +3748,6 @@ def edit_send_data(request, damage_pk, table_pk):
     return render(request, 'infra/bridge_table.html', {'report_data': report_data})
 
 # << 写真フォルダの複数アップロード >>
-@csrf_exempt
 def picture_upload_view(request):
     if request.method == 'POST':
         form = PictureUploadForm(request.POST, request.FILES)
@@ -3759,7 +3758,7 @@ def picture_upload_view(request):
                     file_data = zip_ref.read(file_name)
                     
                     # AWS S3 Boto3 Client
-                    s3 = boto3.client('s3', settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+                    s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
                     s3.upload_fileobj(BytesIO(file_data), settings.AWS_STORAGE_BUCKET_NAME, file_name)
             return JsonResponse({'message': 'Files uploaded successfully'})
     else:
