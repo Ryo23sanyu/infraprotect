@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 # 写真フォルダの複数アップロード
 class PictureUploadForm(forms.Form):
-    zip_file = forms.FileField(label='Select a ZIP File')
+    zip_file = forms.FileField(label='ZIPファイルを選択してください')
 
 # ファイルアップロード
 class FileUploadForm(forms.ModelForm):
