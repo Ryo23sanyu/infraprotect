@@ -3758,7 +3758,7 @@ def picture_upload_view(request):
                     file_data = zip_ref.read(file_name)
                     
                     # AWS S3 Boto3 Client
-                    s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+                    s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY, region_name='ap-northeast-1')
                     s3.upload_fileobj(BytesIO(file_data), settings.AWS_STORAGE_BUCKET_NAME, file_name)
             return JsonResponse({'message': 'Files uploaded successfully'})
     else:

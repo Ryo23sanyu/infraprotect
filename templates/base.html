@@ -78,6 +78,7 @@
         <a class="nav-link mx-3" href="{% url 'accounts:my_page'%}">マイページ</a>
         {% endif %}
         <a class="nav-link mx-3" href="{% url 'list-article' %}">案件一覧</a>
+        <a class="nav-link mx-3" href="{% url 'picture-upload' %}">写真アップロード</a>
       </div>
       <div class="navbar-nav d-flex flex-row">
       {% if request.user.is_authenticated %}
