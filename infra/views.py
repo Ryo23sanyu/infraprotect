@@ -305,18 +305,18 @@ def file_upload(request, article_pk, pk):
     
     if request.method == 'POST':
         #                    ↓  request.POST の中にdxfファイルの名前が入っているだけ。.copy() を実行して編集可能にする。
-        copied = request.POST# .copy()
+        # copied = request.POST.copy()
 
         # ここで Infraのid(pk)を指定する。
-        copied["infra"] = pk
-        copied["article"] = article_pk
+        # copied["infra"] = pk
+        # copied["article"] = article_pk
         
         # 既存のオブジェクトに対して新しいファイルを上書きする処理
-        if Table.objects.filter(infra=infra.id, article=article.id).first():
-            obj = Table.objects.get(infra=infra.id, article=article.id)
-            form = TableForm(copied, request.FILES, instance=obj)
-        else:
-            form = TableForm(copied, request.FILES)
+        # if Table.objects.filter(infra=infra.id, article=article.id).first():
+        #     obj = Table.objects.get(infra=infra.id, article=article.id)
+        #     form = TableForm(copied, request.FILES, instance=obj)
+        # else:
+        #     form = TableForm(copied, request.FILES)
             
         # バリデーション
         if form.is_valid():
