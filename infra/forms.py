@@ -8,6 +8,10 @@ from .models import Article, BridgePicture, DamageComment, FullReportData, Image
 from .models import Photo, Table, NameEntry, PartsNumber
 from django.core.exceptions import ValidationError
 
+# 写真フォルダの複数アップロード
+class PictureUploadForm(forms.Form):
+    zip_file = forms.FileField(label='Select a ZIP File')
+
 # ファイルアップロード
 class FileUploadForm(forms.ModelForm):
     class Meta:

@@ -137,6 +137,14 @@ class Infra(models.Model):
     def __str__(self):
         return self.title
 
+# << 写真フォルダの複数アップロード >>
+class UploadLog(models.Model):
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.file_name
+    
 # << ファイルアップロード >>
 class UploadedFile(models.Model):
     file = models.FileField(upload_to='dxf/')

@@ -12,6 +12,7 @@ import re
 import os
 import glob
 from shutil import copytree
+import zipfile
 from django.db import IntegrityError
 import openpyxl
 import tempfile
@@ -41,7 +42,7 @@ from django.db.models import Q, Value, IntegerField, Case, When, F
 from django.db.models.functions import Cast, Replace, Substr, Length
 from infraprotect import settings
 from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
-from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
+from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, PictureUploadForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
 from urllib.parse import quote, unquote
 from ezdxf.enums import TextEntityAlignment
 import logging
@@ -3745,3 +3746,23 @@ def edit_send_data(request, damage_pk, table_pk):
         return JsonResponse({"status": "success", 'current_text': current_text})
 
     return render(request, 'infra/bridge_table.html', {'report_data': report_data})
+
+# << 写真フォルダの複数アップロード >>
+@csrf_exempt
+def picture_upload_view(request):
+    if request.method == 'POST':
+        form = PictureUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            zip_file = request.FILES['zip_file']
+            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                for file_name in zip_ref.namelist():
+                    file_data = zip_ref.read(file_name)
+                    
+                    # AWS S3 Boto3 Client
+                    s3 = boto3.client('s3', settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+                    s3.upload_fileobj(BytesIO(file_data), settings.AWS_STORAGE_BUCKET_NAME, file_name)
+            return JsonResponse({'message': 'Files uploaded successfully'})
+    else:
+        form = PictureUploadForm()
+
+    return render(request, 'picture_upload.html', {'form': form})
