@@ -3764,4 +3764,4 @@ def picture_upload_view(request):
     else:
         form = PictureUploadForm()
 
-    return render(request, 'picture_upload.html', {'form': form})
+    return render(request, 'infra/picture_upload.html', {'form': form})
