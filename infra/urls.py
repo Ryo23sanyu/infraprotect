@@ -27,7 +27,6 @@ urlpatterns = [
     path('article/<int:pk>/delete/', views.DeleteArticleView.as_view(), name='delete-article'),# 案件の削除
     path('article/<int:pk>/update/', views.UpdateArticleView.as_view(), name='update-article'),# 案件の更新
     # << インプット・アウトプット >>
-    path('upload/', views.s3_upload_file, name='upload_file'),
     path('picture_upload/', views.picture_upload_view, name='picture-upload'), # 写真フォルダの複数アップロード
     path('article/<int:article_pk>/infra/<int:pk>/upload/', views.file_upload, name='file-upload'),# ファイルアップロード
     path('upload/success/', views.file_upload_success, name='file_upload_success'),# アップロード成功時

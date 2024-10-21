@@ -144,10 +144,6 @@ class UploadLog(models.Model):
 
     def __str__(self):
         return self.file_name
-
-class S3Upload(models.Model):
-    title = models.CharField(max_length=100)
-    file = models.FileField(upload_to='uploads/')
     
 # << ファイルアップロード >>
 class UploadedFile(models.Model):
