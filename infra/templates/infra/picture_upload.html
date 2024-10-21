@@ -20,7 +20,7 @@
         const formData = new FormData();
         formData.append('file_name', file.name);
 
-        const response = await fetch('/get-presigned-url/', {
+        const response = await fetch('/picture_upload_view/', {
             method: 'POST',
             body: formData
         });
