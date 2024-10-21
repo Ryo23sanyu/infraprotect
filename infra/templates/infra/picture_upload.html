@@ -4,8 +4,11 @@
 {% block h1 %}ファイルアップロード{% endblock %}
 
 {% block content %}
-<input type="file" id="fileInput">
-<button onclick="uploadFile()">Upload</button>
+<form method="post">
+    {% csrf_token %}
+    <input type="file" id="fileInput">
+    <button type="button" onclick="uploadFile()">Upload</button>
+</form>
 
 <script>
     async function uploadFile() {
@@ -16,12 +19,18 @@
             return;
         }
 
+        // CSRFトークンを取得
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
         // DjangoビューからプリサインドURLを取得
         const formData = new FormData();
         formData.append('file_name', file.name);
 
-        const response = await fetch('/picture_upload_view/', {
+        const response = await fetch('/picture_upload/', { // 紐付いているURL
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
             body: formData
         });
 
