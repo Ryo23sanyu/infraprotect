@@ -18,24 +18,24 @@
             alert('ファイルを選択してください');
             return;
         }
-
+    
         // CSRFトークンを取得
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+    
         // DjangoビューからプリサインドURLを取得
         const formData = new FormData();
         formData.append('file_name', file.name);
-
-        const response = await fetch('/picture_upload/', { // 紐付いているURL
+    
+        const response = await fetch('/picture_upload/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrfToken
             },
             body: formData
         });
-
+    
         const data = await response.json();
-
+    
         if (response.ok) {
             // プリサインドURLを使用してファイルをS3にアップロード
             const presignedUrl = data.url;
@@ -46,7 +46,7 @@
                 },
                 body: file
             });
-
+    
             if (uploadResponse.ok) {
                 alert('アップロード成功');
             } else {
