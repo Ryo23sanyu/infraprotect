@@ -4,7 +4,7 @@ import datetime
 from django import forms
 from django.core.files.storage import default_storage
 
-from .models import Article, BridgePicture, DamageComment, FullReportData, Image, Infra, Regulation, UploadedFile
+from .models import Article, BridgePicture, DamageComment, FullReportData, Image, Infra, Regulation, S3Upload, UploadedFile
 from .models import Photo, Table, NameEntry, PartsNumber
 from django.core.exceptions import ValidationError
 
@@ -12,6 +12,11 @@ from django.core.exceptions import ValidationError
 class PictureUploadForm(forms.Form):
     zip_file = forms.FileField(label='ZIPファイルを選択してください')
 
+class S3UploadForm(forms.ModelForm):
+    class Meta:
+        model = S3Upload
+        fields = ['title', 'file']
+        
 # ファイルアップロード
 class FileUploadForm(forms.ModelForm):
     class Meta:

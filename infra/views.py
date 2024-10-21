@@ -42,10 +42,29 @@ from django.db.models import Q, Value, IntegerField, Case, When, F
 from django.db.models.functions import Cast, Replace, Substr, Length
 from infraprotect import settings
 from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
-from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, PictureUploadForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
+from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, PictureUploadForm, S3UploadForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
 from urllib.parse import quote, unquote
 from ezdxf.enums import TextEntityAlignment
 import logging
+
+def upload_to_s3(file, filename):
+    s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
+    s3.upload_fileobj(file, settings.AWS_STORAGE_BUCKET_NAME, filename)
+
+def s3_upload_file(request):
+    if request.method == 'POST':
+        form = S3UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            file = request.FILES['file']
+            filename = f'uploads/{file.name}'
+            upload_to_s3(file, filename)
+            instance.file.name = filename  # S3でのパスを保存
+            instance.save()
+            return redirect('success')
+    else:
+        form = S3UploadForm()
+    return render(request, 'infra/upload.html', {'form': form})
 
 # 500エラーの際に詳細を表示
 @requires_csrf_token
