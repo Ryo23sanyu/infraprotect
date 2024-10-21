@@ -4,9 +4,48 @@
 {% block h1 %}ファイルアップロード{% endblock %}
 
 {% block content %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Upload</button>
-    </form>
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button>
+
+<script>
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('ファイルを選択してください');
+            return;
+        }
+
+        // DjangoビューからプリサインドURLを取得
+        const formData = new FormData();
+        formData.append('file_name', file.name);
+
+        const response = await fetch('/get-presigned-url/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // プリサインドURLを使用してファイルをS3にアップロード
+            const presignedUrl = data.url;
+            const uploadResponse = await fetch(presignedUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': file.type
+                },
+                body: file
+            });
+
+            if (uploadResponse.ok) {
+                alert('アップロード成功');
+            } else {
+                alert('アップロード失敗');
+            }
+        } else {
+            alert(data.error || 'プリサインドURL取得に失敗しました');
+        }
+    }
+</script>
 {% endblock %}

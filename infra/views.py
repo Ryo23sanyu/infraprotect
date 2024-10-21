@@ -3749,19 +3749,28 @@ def edit_send_data(request, damage_pk, table_pk):
 
 # << 写真フォルダの複数アップロード >>
 def picture_upload_view(request):
-    if request.method == 'POST':
-        form = PictureUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            zip_file = request.FILES['zip_file']
-            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-                for file_name in zip_ref.namelist():
-                    file_data = zip_ref.read(file_name)
-                    
-                    # AWS S3 Boto3 Client
-                    s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY, region_name='ap-northeast-1')
-                    s3.upload_fileobj(BytesIO(file_data), settings.AWS_STORAGE_BUCKET_NAME, file_name)
-            return JsonResponse({'message': 'アップロード成功'})
-    else:
-        form = PictureUploadForm()
+    # S3クライアントを作成
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name='ap-northeast-1'
+    )
+    
+    # リクエストからファイル名を取得
+    file_name = request.POST.get('file_name')
+    if not file_name:
+        return JsonResponse({'error': 'ファイル名が必要です'}, status=400)
 
-    return render(request, 'infra/picture_upload.html', {'form': form})
+    # プリサインドURLを生成
+    presigned_url = s3_client.generate_presigned_url(
+        'put_object',
+        Params={
+            'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+            'Key': file_name,
+            'ContentType': 'application/zip',
+        },
+        ExpiresIn=3600  # URLの有効期間（秒）
+    )
+    
+    return JsonResponse({'url': presigned_url})
