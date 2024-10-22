@@ -1,9 +1,8 @@
-from django.urls import path
-from .import views
-from .views import file_upload, file_upload_success, get_subdirectories, get_symbol, serve_image
-from .views import photo_list, selected_photos, panorama_list
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+from .import views
+from .views import get_subdirectories
 
 # urlパスの設定は何を意味しているのか、ぱっと見でわかるように作成する
 # 例：article/<int:article_pk>/infra/<int:pk>/update/（article〇番のinfra△番の更新ページ）

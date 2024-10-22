@@ -1,6 +1,7 @@
 # アプリ内からインポート
 from collections import defaultdict
 import datetime
+import fnmatch
 from functools import reduce
 from io import BytesIO
 from itertools import groupby, zip_longest
@@ -2122,7 +2123,8 @@ def custom_sort_key(record):
 def excel_output(request, article_pk, pk):
     bridge_name = ""
     # 元のファイルのパス（例: `base.xlsm`）
-    original_file_path = 'base.xlsm'
+    original_file_path = settings.S3_URL+'base.xlsm'
+    print(f"エクセルひな形のURL：{original_file_path}")
     # エクセルファイルを読み込む
     wb = openpyxl.load_workbook(original_file_path, keep_vba=True)
     
@@ -2677,21 +2679,49 @@ def excel_output(request, article_pk, pk):
     binary = BytesIO(virtual.getvalue())
     return FileResponse(binary, filename = new_filename)
 
+    
 # << 指定したInfra(pk)に紐づくTableのエクセルの出力 >>
 def dxf_output(request, article_pk, pk):
     # pythoncom.CoInitialize() # COMライブラリを初期化
     #try:
         # 指定したInfraに紐づく Tableを取り出す
-        table = Table.objects.filter(infra=pk).first()
-        # print(f"テーブル：{table.dxf.url}") # 相対パス
+        article = Article.objects.filter(id=article_pk).first()
+        infra = Infra.objects.filter(id=pk).first()
         
-        # 絶対パスに変換
-        encoded_url_path = table.dxf.url
-        decoded_url_path = urllib.parse.unquote(encoded_url_path) # URLデコード
-        dxf_filename = os.path.join(settings.BASE_DIR, decoded_url_path.lstrip('/'))
-        # print(dxf_filename)
-        #      ↑ dxfファイルのフルパス
-        
+        # settings.pyの読み込み
+        # from django.conf import settings
+
+        # << 案件名とファイル名を連結してdxfファイルのURLを取得する >>
+        # AWSクライアントを作成
+        s3 = boto3.client('s3')
+
+        def match_s3_objects_with_prefix(bucket_name, prefix, pattern):
+            # プレフィックス(特定のフォルダ)を指定して、オブジェクトをリスト
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+
+            if 'Contents' not in response:
+                return []
+
+            # パターンに基づいてオブジェクトをフィルタリング
+            matched_keys = [obj['Key'] for obj in response['Contents'] if fnmatch.fnmatch(obj['Key'], pattern)]
+
+            return matched_keys
+
+        # 変数を設定
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        folder_name = article.案件名+"/"
+        pattern = f'*{infra.title}*/{infra.title}.dxf'
+
+        # 該当するオブジェクトを取得
+        matched_objects = match_s3_objects_with_prefix(bucket_name, folder_name, pattern)
+
+        # 結果を表示
+        for obj_key in matched_objects:
+            dxf_filename = f"https://{bucket_name}.s3.ap-northeast-1.amazonaws.com/{obj_key}"
+
+        print(f"dxfファイルの絶対URLは：{dxf_filename}")
+    
+
         # ファイルをバイトデータとして読み込む
         with open(dxf_filename, 'rb') as f:
             binary = BytesIO(f.read())
@@ -3154,12 +3184,12 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
                 def replace_all(text, replacements):
                     return reduce(lambda acc, pair: acc.replace(pair[0], pair[1]), replacements, text)
                 
-                name_item = replace_all(last_item[i], sorted_replacements)
-                #name_item = last_item[i].replace("S", "佐藤").replace("H", "濵田").replace(" ", "　")
+                name_item = replace_all(last_item[i], sorted_replacements) # アルファベットを名前に置換
+              # name_item = last_item[i].replace("S", "佐藤").replace("H", "濵田").replace(" ", "　")
             # name_item に格納されるのは 'NON-a', '9月7日 佐藤*/*404', '9月7日 佐藤*/*537', '9月8日 佐藤*/*117,9月8日 佐藤*/*253'のいずれか
             
             pattern = r',(?![^(]*\))'
-            dis_items = re.split(pattern, name_item)#「9月8日 S*/*117」,「9月8日 S*/*253」
+            dis_items = re.split(pattern, name_item)#「9月8日 佐藤*/*117」,「9月8日 佐藤*/*253」
             # コンマが付いていたら分割
             
             time_result = []
@@ -3174,14 +3204,49 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
                     # 日付がない項目は、現在の日付を先頭に追加
                     time_result.append(''.join([current_date, '　', time_item]))
 
-            sub_dis_items = ['infra/static/infra/img/' + item + ".jpg" for item in time_result]
-            # sub_dis_items = [table_instance.infra.article.ファイルパス + "\\" + table_instance.infra.title + "*\\" + item + ".jpg" for item in time_result]
-            # table_instance.infra.article.ファイルパス # C%3A%5CUsers%5Cdobokuka4%5CDesktop/(件名なし)/案件名/写真
-            # table_instance.infra.title # サンプル橋
-            # 「C:\work\django\myproject\program\infraprotect\」+「infra\static\infra\img\」+「9月7日　佐藤　地上」
-            # dis_itemsの要素の数だけ、分割した各文字の先頭に「infra/static/infra/img/」各文字の後ろに「.jpg」を追加
-            # ['infra/static/infra/img/9月8日 S*/*117.jpg', 'infra/static/infra/img/9月8日 S*/*253.jpg']
-            # print(f"このデータは：{sub_dis_items}")
+            name_and_wildcardnumber = [item + ".jpg" for item in time_result]
+            # ['9月8日 佐藤*/*117.jpg', '9月8日 佐藤*/*253.jpg']
+            
+            # << S3にアップロードした写真のワイルドカード検索 >>
+            s3 = boto3.client('s3')
+
+            bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+
+            # << カッコを含む文字を削除 ※二重かっこ「 (( 他 )) 」は不可 >>
+            # sub_dis_items = ['9月8日 佐藤(いろいろ)/*117.jpg', '9月8日 佐藤(ぽけぽけ)/*253.jpg']
+            # スラッシュとコンマで分割する
+            pattern = r'\(.*?\)|\.jpg|\*' # カッコとその中・「.jpg」・「*」を削除
+            split_wildcard_lists = [re.split(r'[,/]', re.sub(pattern, '', item)) for item in name_and_wildcardnumber]
+            # リストを表示する
+            s3_folder_name = [item[0]+"/" for item in split_wildcard_lists] # ['9月8日 佐藤', '9月8日 佐藤']
+            wildcard_picture = tuple(item[1] for item in split_wildcard_lists) # ('117', '253')
+
+            def search_s3_objects(bucket, prefix, pattern):
+                paginate = s3.get_paginator("list_objects_v2")
+                matching_keys = []  # 見つかったキーを保持するリスト
+
+                # 各ページを順に確認
+                for page in paginate.paginate(Bucket=bucket, Prefix=prefix):
+                    if 'Contents' in page:
+                        for obj in page['Contents']:
+                            key = obj['Key']
+                            # パターンに基づいてファイルが一致しているか確認
+                            if fnmatch.fnmatch(key, f"{prefix}*{pattern}.jpg"):
+                                matching_keys.append(key)
+
+                return matching_keys
+
+            sub_dis_items = []
+
+            for prefix, pattern in zip(s3_folder_name, wildcard_picture):
+                found_keys = search_s3_objects(bucket_name, prefix, pattern)
+                for found_key in found_keys:
+                    # 各見つかったキーに基づいてURLを生成してリストに追加
+                    object_url = f"https://{bucket_name}.s3.ap-northeast-1.amazonaws.com/{found_key}"
+                    sub_dis_items.append(object_url)
+
+            print("この写真URLは：", sub_dis_items)
+            
             photo_paths = []
             # photo_pathsリストを作成
             for item in sub_dis_items:
@@ -3756,7 +3821,7 @@ def picture_upload_view(request):
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
         region_name='ap-northeast-1'
     )
-    
+
     # リクエストからファイル名を取得
     file_name = request.POST.get('file_name')
     if not file_name:
