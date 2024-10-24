@@ -192,12 +192,11 @@ if not DEBUG:
     
 
     import environ
-    env = environ.Env()
-    # Optional; can be omitted if you include 'DJANGO_READ_DOT_ENV_FILE' in your environment variables
-    environ.Env.read_env()
 
-    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='default_bucket_name')
-    
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env = environ.Env()
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
     #DBのアクセス設定
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
