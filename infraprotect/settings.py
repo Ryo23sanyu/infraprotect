@@ -202,8 +202,8 @@ if not DEBUG:
     DATABASES['default'].update(db_from_env)
     
     # 静的ファイル(static)の存在場所を指定する
-    # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-    STATIC_ROOT = BASE_DIR / 'static'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    # STATIC_ROOT = BASE_DIR / 'static'
     
     #ストレージ設定
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
