@@ -383,9 +383,6 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     article = Article.objects.filter(id=article_pk).first()
     infra = Infra.objects.filter(id=pk).first()
     
-    # settings.pyの読み込み
-    # from django.conf import settings
-
     # << 案件名とファイル名を連結してdxfファイルのURLを取得する >>
     # AWSクライアントを作成
     s3 = boto3.client('s3')
@@ -401,9 +398,6 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         matched_keys = [obj['Key'] for obj in response['Contents'] if fnmatch.fnmatch(obj['Key'], pattern)]
 
         return matched_keys
-
-    # 変数を設定
-    # from django.conf import settings
     
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
     print(bucket_name)
