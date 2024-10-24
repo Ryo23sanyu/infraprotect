@@ -221,7 +221,7 @@ class PartsNumber(models.Model):
 # << 写真データを格納するモデル >>
 class BridgePicture(models.Model):
     image = models.ImageField(upload_to='photos/') # 写真データ
-    picture_number = models.IntegerField() # 数字のみの入力
+    picture_number = models.IntegerField(null=True, blank=True) # 数字のみの入力
     damage_name = models.CharField(max_length=255) # '①腐食(大大)-e', '⑤防食機能の劣化(分類1)-e'
     parts_split = models.CharField(max_length=255) # '排水管 Dp00'
     damage_coordinate_x = models.CharField(max_length=255) # '538482.3557216563', '229268.8593029478'
