@@ -2834,7 +2834,6 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     object_key = dxf_filename
     # ダウンロード先のローカルファイルパスを指定
     # local_file_path = os.path.join(desktop_path, 'downloaded_file.dxf')
-    from pathlib import Path
     local_file_path = Path(desktop_path) / 'downloaded_file.dxf'
     print(f'ローカルファイルパス：{local_file_path}')
 
