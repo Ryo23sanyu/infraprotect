@@ -1,0 +1,14 @@
+# 特定のファイルを無視
+# ファイル名
+LICENSE.chromedriver
+Procfile.windows
+requirements.txt
+
+# 特定のディレクトリを無視
+# ディレクトリ名/
+vscode/
+myvenv/
+
+# 特定の拡張子を持つファイルを無視
+# *.拡張子
+.env
