@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-uirslahosm*_udwemotzje2fvpi0+ss7e=irj&q$i_b%hp#z#-"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # デプロイ時はFalseとする
-# DEBUG = False
+# DEBUG = True # デプロイ時はFalseとする
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -195,8 +195,9 @@ if not DEBUG:
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     env = environ.Env()
+    # 環境変数の強制読み込みを行う
     environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
+    
     #DBのアクセス設定
     db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
     DATABASES['default'].update(db_from_env)
@@ -204,12 +205,11 @@ if not DEBUG:
     # 静的ファイル(static)の存在場所を指定する
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
     # STATIC_ROOT = BASE_DIR / 'static'
-    
+
     #ストレージ設定
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-    # AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
 
     # mediaファイル保存先
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
