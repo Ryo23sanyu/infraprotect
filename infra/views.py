@@ -399,7 +399,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
 
         return matched_keys
     
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    bucket_name = 'infraprotect'
     print(bucket_name)
     folder_name = article.案件名+"/"
     print(folder_name)
@@ -2170,7 +2170,7 @@ def excel_output(request, article_pk, pk):
     
     from django.conf import settings
     
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    bucket_name = 'infraprotect'
     print(bucket_name)
     # 元のファイルのパス（例: `base.xlsm`）
     original_file_path = f"https://{bucket_name}.s3.ap-northeast-1.amazonaws.com/base.xlsm"
@@ -2758,7 +2758,7 @@ def dxf_output(request, article_pk, pk):
             return matched_keys
 
         # 変数を設定
-        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        bucket_name = 'infraprotect'
         folder_name = article.案件名+"/"
         pattern = f'*{infra.title}*/{infra.title}.dxf'
 
@@ -2826,10 +2826,11 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     # S3クライアントの作成
     s3 = boto3.client('s3')
     # S3バケット名とオブジェクトキーを指定
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    bucket_name = 'infraprotect'
     object_key = dxf_filename
     # ダウンロード先のローカルファイルパスを指定
     local_file_path = os.path.join(desktop_path, 'downloaded_file.dxf')
+    print(f'ローカルファイルパス：{local_file_path}')
 
     # S3からファイルをローカルにダウンロード
     try:
@@ -3289,7 +3290,7 @@ def create_picturelist(request, dxf_filename, search_title_text, second_search_t
             # << S3にアップロードした写真のワイルドカード検索 >>
             s3 = boto3.client('s3')
 
-            bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+            bucket_name = 'infraprotect'
 
             # << カッコを含む文字を削除 ※二重かっこ「 (( 他 )) 」は不可 >>
             # sub_dis_items = ['9月8日 佐藤(いろいろ)/*117.jpg', '9月8日 佐藤(ぽけぽけ)/*253.jpg']
