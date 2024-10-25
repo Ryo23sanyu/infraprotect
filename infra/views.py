@@ -2827,7 +2827,7 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     # ユーザーのデスクトップディレクトリを取得
     desktop_path = str(Path.home() / "Desktop")
     # S3クライアントの作成
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name='ap-northeast-1')
     # S3バケット名とオブジェクトキーを指定
     bucket_name = 'infraprotect'
     object_key = dxf_filename
