@@ -2759,8 +2759,11 @@ def dxf_output(request, article_pk, pk):
 
         # 変数を設定
         bucket_name = 'infraprotect'
-        folder_name = article.案件名+"/"
-        pattern = f'*{infra.title}*/{infra.title}.dxf'
+        # それぞれの値をURLエンコードする
+        encoded_article_name = urllib.parse.quote(article.案件名)
+        encoded_infra_title = urllib.parse.quote(infra.title)
+        folder_name = f'{encoded_article_name}/'
+        pattern = f'*{encoded_infra_title}*/{encoded_infra_title}.dxf'
 
         # 該当するオブジェクトを取得
         matched_objects = match_s3_objects_with_prefix(bucket_name, folder_name, pattern)
