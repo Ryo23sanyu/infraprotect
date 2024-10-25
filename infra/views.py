@@ -400,12 +400,12 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         return matched_keys
     
     bucket_name = 'infraprotect'
-    print(bucket_name)
-    folder_name = article.案件名+"/"
-    print(folder_name)
-    pattern = f'*{infra.title}*/{infra.title}.dxf'
-    print(pattern)
-
+    encoded_article_name = urllib.parse.quote(article.案件名)
+    encoded_infra_title = urllib.parse.quote(infra.title)
+    folder_name = f'{encoded_article_name}/'
+    pattern = f'*{encoded_infra_title}*/{encoded_infra_title}.dxf'
+    print(f'エンコードURL：{pattern}')
+    
     # 該当するオブジェクトを取得
     matched_objects = match_s3_objects_with_prefix(bucket_name, folder_name, pattern)
     if matched_objects:
