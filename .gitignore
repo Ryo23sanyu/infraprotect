@@ -2,7 +2,7 @@
 # ファイル名
 LICENSE.chromedriver
 Procfile.windows
-requirements.txt
+chromedriver.exe
 
 # 特定のディレクトリを無視
 # ディレクトリ名/
