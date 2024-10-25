@@ -2826,21 +2826,27 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     print(dxf_filename)
     # ユーザーのデスクトップディレクトリを取得
     desktop_path = str(Path.home() / "Desktop")
+
     # S3クライアントの作成
     s3 = boto3.client('s3', region_name='ap-northeast-1')
     # S3バケット名とオブジェクトキーを指定
     bucket_name = 'infraprotect'
     object_key = dxf_filename
     # ダウンロード先のローカルファイルパスを指定
-    local_file_path = os.path.join(desktop_path, 'downloaded_file.dxf')
+    # local_file_path = os.path.join(desktop_path, 'downloaded_file.dxf')
+    from pathlib import Path
+    local_file_path = Path(desktop_path) / 'downloaded_file.dxf'
     print(f'ローカルファイルパス：{local_file_path}')
 
     # S3からファイルをローカルにダウンロード
+    
     try:
         s3.download_file(bucket_name, object_key, local_file_path)
         print(f"ダウンロード完了: {local_file_path}")
     except Exception as e:
         print(f"S3からのファイルダウンロードに失敗しました: {e}")
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
         raise
 
     # ローカルファイルをezdxfで読み込む
