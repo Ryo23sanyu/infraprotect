@@ -382,7 +382,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     # 指定したInfraに紐づく Tableを取り出す
     article = Article.objects.filter(id=article_pk).first()
     infra = Infra.objects.filter(id=pk).first()
-    
+    table = Table.objects.filter(infra=pk).first()
     # << 案件名とファイル名を連結してdxfファイルのURLを取得する >>
     # AWSクライアントを作成
     s3 = boto3.client('s3')
@@ -408,6 +408,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
 
     # 該当するオブジェクトを取得
     matched_objects = match_s3_objects_with_prefix(bucket_name, folder_name, pattern)
+
     if matched_objects:
         print(f"該当オブジェクト：{matched_objects}")
     else:
@@ -416,8 +417,12 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     # 結果を表示
     for obj_key in matched_objects:
         dxf_filename = f"https://{bucket_name}.s3.ap-northeast-1.amazonaws.com/{obj_key}"
+    
+    encode_dxf_filename = urllib.parse.quote(dxf_filename, safe='/:') # スラッシュとコロン以外をエンコード
+    dxf_filename = encode_dxf_filename
 
     print(f"dxfファイルの絶対URLは：{dxf_filename}")
+    print(f"dxfファイル（エンコード）の絶対URLは：{encode_dxf_filename}")
     
     # オブジェクトディレクトリの相対パスを取得
     # if table.dxf:
@@ -438,16 +443,17 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
 
     # << 辞書型として、全径間を1つの多重リストに格納 >>
     max_search_title_text = infra.径間数
-    print(max_search_title_text)
+    print(f"最大径間数：{max_search_title_text}")
     database_sorted_items = []  # 結果をまとめるリスト
     
     for search_title_text_with_suffix in range(1, max_search_title_text + 1):
         search_title_text = f"{search_title_text_with_suffix}径間"
         print("dxfファイル名")
         print(dxf_filename)
+        print(encode_dxf_filename)
         print(search_title_text)
-        print("ここまではOK")
-        sub_database_sorted_items = create_picturelist(request, dxf_filename, search_title_text, second_search_title_text)
+        print("ここまではOK") #                                                              1径間              損傷図
+        sub_database_sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
        #sub_database_sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
         for item in sub_database_sorted_items:
             item['search'] = search_title_text
@@ -1360,7 +1366,7 @@ def observations_list(request, article_pk, pk):
 
     second_search_title_text = "損傷図"
     
-    sorted_items = create_picturelist(request, dxf_filename, search_title_text, second_search_title_text)
+    sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
    #sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
     """"""
     # 全パーツデータを取得
@@ -2821,32 +2827,36 @@ def entity_extension(mtext, neighbor):
     
     return False
 
-def find_square_around_text(dxf_filename, target_text, second_target_text):
+def find_square_around_text(article_pk, pk, dxf_filename, search_title_text, second_search_title_text):
+    # find_square_around_text(article_pk, pk, dxf_filename, target_text, second_target_text)
     print("関数の中身")
     print(dxf_filename)
-    # ユーザーのデスクトップディレクトリを取得
-    desktop_path = str(Path.home() / "Desktop")
-
-    # S3クライアントの作成
-    s3 = boto3.client('s3', region_name='ap-northeast-1')
-    # S3バケット名とオブジェクトキーを指定
-    bucket_name = 'infraprotect'
-    object_key = dxf_filename
-    # ダウンロード先のローカルファイルパスを指定
-    # local_file_path = os.path.join(desktop_path, 'downloaded_file.dxf')
-    local_file_path = Path(desktop_path) / 'downloaded_file.dxf'
-    print(f'ローカルファイルパス：{local_file_path}')
-
-    # S3からファイルをローカルにダウンロード
     
-    try:
-        s3.download_file(bucket_name, object_key, local_file_path)
-        print(f"ダウンロード完了: {local_file_path}")
-    except Exception as e:
-        print(f"S3からのファイルダウンロードに失敗しました: {e}")
-        import logging
-        logging.basicConfig(level=logging.DEBUG)
-        raise
+    article = Article.objects.filter(id=article_pk).first()
+    infra = Infra.objects.filter(id=pk).first()
+    
+    # << S3からdxfファイルのダウンロード >>
+    bucket_name = 'infraprotect'
+    object_key = f'{article.案件名}/{infra.title}/{infra.title}.dxf'
+    
+    # ファイルパスにファイル名を含める
+    local_file_path = f'{str(Path.home() / "Desktop")}\intect_dxf\{article.案件名}\{infra.title}\{infra.title}.dxf'
+
+    def download_dxf_from_s3(bucket_name, object_key, local_file_path):
+        s3 = boto3.client('s3')
+
+        try:
+            # フォルダが存在しない場合は作成
+            os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+
+            # S3からファイルを指定したパスにダウンロード
+            s3.download_file(bucket_name, object_key, local_file_path)
+            print("ファイルのダウンロードが完了しました。")
+        except Exception as e:
+            print(f"エラーが発生しました: {e}")
+
+    # 関数を呼び出す
+    download_dxf_from_s3(bucket_name, object_key, local_file_path)
 
     # ローカルファイルをezdxfで読み込む
     try:
@@ -2867,14 +2877,14 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     print("途中経過　確認1")
     # MTEXTエンティティの各要素をtextという変数に代入してループ処理
     for mtext_insert_point in msp.query('MTEXT'): # モデルスペース内の「MTEXT」エンティティをすべて照会し、ループ処理
-        if mtext_insert_point.dxf.text == target_text: # エンティティのテキストが検索対象のテキストと一致した場合
+        if mtext_insert_point.dxf.text == search_title_text:# target_text: # エンティティのテキストが検索対象のテキストと一致した場合
             text_insertion_point = mtext_insert_point.dxf.insert # テキストの挿入点(dxf.insert)を取得します。
             text_positions.append(text_insertion_point[0]) # 挿入点のX座標をリストに保存
             break
     print("途中経過　確認2")
     if not text_positions: # text_positionsリストが空の場合(見つけられなかった場合)
         for mtext_insert_point in msp.query('MTEXT'): # モデルスペース内の「MTEXT」エンティティをすべて照会し、ループ処理
-            if mtext_insert_point.dxf.text == second_target_text: # エンティティのテキストが検索対象のテキストと一致した場合
+            if mtext_insert_point.dxf.text == second_search_title_text:# second_target_text: # エンティティのテキストが検索対象のテキストと一致した場合
                 text_insertion_point = mtext_insert_point.dxf.insert # テキストの挿入点(dxf.insert)を取得します。
                 text_positions.append(text_insertion_point[0]) # 挿入点のX座標をリストに保存
                 break
@@ -2986,9 +2996,10 @@ def find_square_around_text(dxf_filename, target_text, second_target_text):
     return extracted_text
 
 # << dxfから要素を抽出・整列してsorted_itemsに渡す >>
-def create_picturelist(request, dxf_filename, search_title_text, second_search_title_text):
+def create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text):
     print("関数スタート：create_picturelist")
   # create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
+  #                                                          1径間　　　　　　　　　　　　損傷図　　　　　　　　　　　
     extracted_text = find_square_around_text(dxf_filename, search_title_text, second_search_title_text) # 関数の定義
     print("関数スタート：find_square_around_text")
     # リストを処理して、スペースを追加する関数を定義
@@ -3772,7 +3783,8 @@ def edit_report_data(request, damage_pk, table_pk):
         print(f"変更前coords:{coords}")
         
         # DXFファイルの更新処理
-        def find_square_around_text(dxf_filename, target_text, second_target_text):
+        def find_square_around_text(dxf_filename, search_title_text, second_search_title_text):
+            # find_square_around_text(dxf_filename, target_text, second_target_text)
             doc = ezdxf.readfile(dxf_filename)
             msp = doc.modelspace()
             print(f"DOC:{doc}")
