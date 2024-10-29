@@ -74,71 +74,74 @@
                         </form> {% endcomment %}
                     </div>
                 </td>
-                {% for bridge in group %}
-                {% if forloop.first %}
-                <td class="center-align">
-                    <ul class="vert"> 
-                        {% for entry in picture_data %}
-                        {% if entry.full_report.id == group.0.id %}
-                        {% for picture in entry.matches %}
+            {% for bridge in group %}
+            {% if forloop.first %}
+            <td class="center-align">
+                <ul class="vert"> 
+                    {% for entry in picture_data %}
+                    {% if entry.full_report.id == group.0.id %}
+                    {% for picture in entry.matches %}
 
-                        <p>{{ picture }}</p>
-                            <ul class="side">
-                                <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
-                                    <div style="position: relative; display: flex; align-items: center;"> <!--align-items: center; 縦の中央に配置<div style="display: flex; align-items: center;"> -->
-                                        <div style="position: relative;">
-                                            <div style="position: absolute; top: 0px; left: -50px; background-color: none; color: black; padding: 2px 5px; font-size: 12px; border: 1px solid grey; width: 50px; height: 30px; overflow: hidden;">
-                                                {% comment %} {% for number in bridge.picture_number|split_comma %} {% endcomment %}
-                                                <textarea type="number" id="picture_number-{{ bridge.id }}" name="picture_number" style="border: none; width: 100%; height: 100%; resize: none; overflow: hidden;">{{ picture.picture_number }}</textarea> <!-- 番号を表示し編集可能にする -->
+                        <ul class="side">
+                            <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
+                                <div style="position: relative; display: flex; align-items: center;"> <!--align-items: center; 縦の中央に配置<div style="display: flex; align-items: center;"> -->
+                                    <div style="position: relative;">
+                                        <div style="position: absolute; top: 0px; left: -50px; background-color: none; color: black; padding: 2px 5px; font-size: 12px; border: 1px solid grey; width: 50px; height: 30px; overflow: hidden;">
+                                            {% comment %} {% for number in bridge.picture_number|split_comma %} {% endcomment %}
+                                            <textarea type="number" id="picture_number-{{ bridge.id }}" name="picture_number" style="border: none; width: 100%; height: 100%; resize: none; overflow: hidden;">{{ picture.picture_number }}</textarea> <!-- 番号を表示し編集可能にする -->
 
-                                            </div>{% comment %} src="{{ picture|remove_prefix:'/infra/static' }}" {% url 'serve_image' picture %} strip:先頭と末尾から空白を取り除く {% endcomment %}
-                                            <img id="uploaded-image-{{ forloop.parentloop.counter }}" src="{{ picture.image.url }}" width="200" height="150" style="margin:0 10px;">
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; justify-content: center;"> <!--justify-content: center; ボタンを縦の中央に配置-->
-                                            <input type="file" style="display: none" onchange="uploadPicture(this, {{ bridge.id }})" accept="image/*">
-                                            <button type="button" onclick="changePicture(this, {{ bridge.id }}, '{{ picture.strip }}')" style="margin-bottom: 10px;">変更</button>
-                                            <button type="button" onclick="addPicture(this, {{ bridge.id }})" style="margin-bottom: 10px;">追加</button>
-                                            <button type="button" onclick="deletePicture(this, {{ bridge.id }}, '{{ picture.strip }}')" style="margin-bottom: 10px;">削除</button> <!--縦文字に変更-->
-                                        </div>
+                                        </div>{% comment %} src="{{ picture|remove_prefix:'/infra/static' }}" {% url 'serve_image' picture %} strip:先頭と末尾から空白を取り除く {% endcomment %}
+                                        {% with bridge.this_time_picture|split_urls as image_urls %}
+                                            {% for image_url in image_urls %}
+                                                <img id="uploaded-image-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" src="{{ image_url.strip }}" width="200" height="150" style="margin:0 10px;">
+                                            {% endfor %}
+                                        {% endwith %}
                                     </div>
-                                </li>
-                                <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
-                                    <div style="display: flex; align-items: center;"> <!--align-items: center; 縦の中央に配置-->
-                                        <div>
-                                        {% if bridge.last_time_picture is None %}
-                                            <img id="before-image" src="{% static 'infra/noImage.png' %}" width="200" height="150" style="margin:0 10px; border: 1px solid grey;">
-                                        {% else %}
-                                            <img id="before-image" src="{% static bridge.last_time_picture %}" width="200" height="150" style="margin:0 10px; border: 1px solid grey;">
-                                        {% endif %}
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; justify-content: center;"> <!--justify-content: center; ボタンを縦の中央に配置-->
-                                            <input id="upload-file" name="upload-file" type="file" style="display: none">
-                                            <button id="fileSelect" type="button" style="margin-bottom: 10px;" value="{% static item %}">変更</button>
-                                            <!--<button id="fileSelect" type="button" style="margin-bottom: 10px;" value="{% static item %}">変更</button>-->
-                                            <!--<button style="margin-bottom: 10px;">変更</button> bottom(下方向)に10pxの間隔を空ける-->
-                                            <button>削除</button>
-                                        </div>
+                                    <div style="display: flex; flex-direction: column; justify-content: center;"> <!--justify-content: center; ボタンを縦の中央に配置-->
+                                        <input type="file" style="display: none" onchange="uploadPicture(this, {{ bridge.id }})" accept="image/*">
+                                        <button type="button" onclick="changePicture(this, {{ bridge.id }}, '{{ picture.strip }}')" style="margin-bottom: 10px;">変更</button>
+                                        <button type="button" onclick="addPicture(this, {{ bridge.id }})" style="margin-bottom: 10px;">追加</button>
+                                        <button type="button" onclick="deletePicture(this, {{ bridge.id }}, '{{ picture.strip }}')" style="margin-bottom: 10px;">削除</button> <!--縦文字に変更-->
                                     </div>
-                                </li>
-                                <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
-                                    {% spaceless %}
-                                        {% if bridge.textarea_content %} <!-- damage_tableのforループ(bridge)とviews.pyのtextarea_content-->
-                                            <textarea name="notes" rows="6" style="margin:0 10px;">{{ bridge.textarea_content|safe }}</textarea>
-                                        {% else %}
-                                            <textarea name="notes" rows="6" style="margin:0 10px;" placeholder="写真メモを入力してください。"></textarea>
-                                        {% endif %}
-                                    {% endspaceless %}
-                                </li>
-                            </ul>
-                        {% endfor %}
-                        {% endif %}
-                        {% endfor %}
-                        
-                    </ul>
-                
-                </td>
-                {% endif %}
-                {% endfor %}
+                                </div>
+                            </li>
+                            <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
+                                <div style="display: flex; align-items: center;"> <!--align-items: center; 縦の中央に配置-->
+                                    <div>
+                                    {% if bridge.last_time_picture is None %}
+                                        <img id="before-image" src="{% static 'infra/noImage.png' %}" width="200" height="150" style="margin:0 10px; border: 1px solid grey;">
+                                    {% else %}
+                                        <img id="before-image" src="{% static bridge.last_time_picture %}" width="200" height="150" style="margin:0 10px; border: 1px solid grey;">
+                                    {% endif %}
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; justify-content: center;"> <!--justify-content: center; ボタンを縦の中央に配置-->
+                                        <input id="upload-file" name="upload-file" type="file" style="display: none">
+                                        <button id="fileSelect" type="button" style="margin-bottom: 10px;" value="{% static item %}">変更</button>
+                                        <!--<button id="fileSelect" type="button" style="margin-bottom: 10px;" value="{% static item %}">変更</button>-->
+                                        <!--<button style="margin-bottom: 10px;">変更</button> bottom(下方向)に10pxの間隔を空ける-->
+                                        <button>削除</button>
+                                    </div>
+                                </div>
+                            </li>
+                            <li style="top-bottom: 5px; margin-bottom: 5px;"> <!-- ここで下部の空間を指定 -->
+                                {% spaceless %}
+                                    {% if bridge.textarea_content %} <!-- damage_tableのforループ(bridge)とviews.pyのtextarea_content-->
+                                        <textarea name="notes" rows="6" style="margin:0 10px;">{{ bridge.textarea_content|safe }}</textarea>
+                                    {% else %}
+                                        <textarea name="notes" rows="6" style="margin:0 10px;" placeholder="写真メモを入力してください。"></textarea>
+                                    {% endif %}
+                                {% endspaceless %}
+                            </li>
+                        </ul>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                    
+                </ul>
+            
+            </td>
+            {% endif %}
+            {% endfor %}
         </tr>
         {% endfor %}
     </tbody>

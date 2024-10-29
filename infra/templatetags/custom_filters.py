@@ -47,3 +47,9 @@ def get_bridge_picture(pictures, picture):
         return pictures.get(this_time_picture=picture)
     except BridgePicture.DoesNotExist:
         return None
+    
+register = template.Library()
+
+@register.filter
+def split_urls(value):
+    return value.split(', ')
