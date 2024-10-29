@@ -281,19 +281,23 @@
     <details class="details js-details">
         <summary class="details-summary js-details-summary"><span class="btn"></span>{{ title }}</summary>
         <div class="details-content js-details-content">
-            {% for parts in parts_list|sort_list %}
-            <div style="position: relative; display: inline-block; margin-left: 10px; margin-right: 20px; padding: 10px; border: none;">
-                <p style="display: inline; margin: 0; position: relative;">{{ parts.number }}</p>
-                <form action="{% url 'delete_number' article_pk=article_pk pk=pk unique_id=parts.unique_id %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="delete-number-button">✕</button>
-                </form>
-            </div>
-            {% endfor %}
+            {% if parts_list %}
+                {% for parts in parts_list %}
+                <div style="position: relative; display: inline-block; margin-left: 10px; margin-right: 20px; padding: 10px; border: none;">
+                    <p style="display: inline; margin: 0; position: relative;">{{ parts.number }}</p>
+                    <form action="{% url 'delete_number' article_pk=article_pk pk=pk unique_id=parts.unique_id %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-number-button">✕</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>登録されている番号がありません。</p>
+            {% endif %}
         </div>
     </details>
     {% empty %}
-        <p>登録されている番号がありません。</p>
+        <p>登録がありません。</p>
     {% endfor %}
 
 <script>

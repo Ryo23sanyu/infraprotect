@@ -5,12 +5,14 @@ from infra.models import BridgePicture
 
 register = template.Library()
 
-@register.filter
 def split_comma(value):
-    # valueがNoneの場合、空のリストを返す
     if not value:
         return []
     return value.split(",")
+
+@register.filter
+def split(value, delimiter=','):
+    return value.split(delimiter)
 
 @register.filter(name='store')
 def store(value, storage):

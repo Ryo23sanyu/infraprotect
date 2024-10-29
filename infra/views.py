@@ -494,6 +494,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     picture_counter = 1
     index_counter = 0
     picture_number_box = []
+
     for damage_data in database_sorted_items:
         # 元の辞書から 'picture_number' の値を取得
         #             　辞書型 ↓           ↓ キーの名前      ↓ 存在しない場合、デフォルト値として空白を返す
@@ -502,24 +503,24 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         if picture_number:
             # 数字のみを抽出
             before_numbers_only = re.findall(r'\d+', str(picture_number)) # ['2']  ['2','3']
-            print(f"リスト型番号:{before_numbers_only}")
-            print(f"{index_counter}  どっちが大きい　{len(before_numbers_only)}")
+            #print(f"リスト型番号:{before_numbers_only}")
+            #print(f"{index_counter}  どっちが大きい　{len(before_numbers_only)}")
             # before_numbers_onlyの各元素で別の処理を行う場合
             # カウンターに基づいて処理を行う
             if index_counter == 0:
                 picture_number_box = []
             if len(before_numbers_only) > 1:
                 for number in before_numbers_only:
-                    print(f"{index_counter}番目の要素: {number}")
+                    #print(f"{index_counter}番目の要素: {number}")
                     picture_number_box.append(number)
                     index_counter += 1
                 index_counter = 0
-                print(picture_number_box)
+                #print(picture_number_box)
             else:
                 picture_number_box = []
                 index_counter = 0
                 numbers_only = before_numbers_only[index_counter]  # カウンターに対応する数字を取得
-                print(f"オンリーナンバーズ（抽出後）: {numbers_only}")
+                #print(f"オンリーナンバーズ（抽出後）: {numbers_only}")
                 picture_number_box.append(numbers_only)
         else:
             numbers_only = None
@@ -538,7 +539,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         names = damage_data.get('parts_name', '')
         damages = damage_data.get('damage_name', '')
         #print(f"names:{names}")
-        #print(f"damages:{damages}")
+        print(f"damages:{damages}")
         
         split_names = []
 
@@ -571,10 +572,10 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         last_time_picture = simple_flatten(damage_data.get('last_time_picture', ''))
         textarea_content = damage_data.get('textarea_content', '')
         span_number = damage_data.get('search', '')
-        print("----------------------------------")
-        print(f"damage_data:{damage_data}")
-        print(f"join:{join}")
-        print(f"this_time_picture:{this_time_picture}")
+        #print("----------------------------------")
+        #print(f"damage_data:{damage_data}")
+        #print(f"join:{join}")
+        #print(f"this_time_picture:{this_time_picture}")
         name_length = len(split_names)
         damage_length = len(damages)
         
@@ -622,15 +623,15 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
             return result
             # 共通のフィールドを辞書に格納
         infra = Infra.objects.filter(id=pk).first()
-        print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
+        #print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
         article = infra.article
-        print(f"article:{article}({article.id})") # お試し(2)
+        #print(f"article:{article}({article.id})") # お試し(2)
         table = Table.objects.filter(infra=infra.id, article=article.id).first()
-        print(table) # 旗揚げチェック：お試し（infra/table/dxf/121_2径間番号違い.dxf）
+        #print(table) # 旗揚げチェック：お試し（infra/table/dxf/121_2径間番号違い.dxf）
         
-        # << 管理サイトに登録するコード >>
+        # << 管理サイトに登録するコード（損傷写真帳） >>
         if not is_multi_list(split_names) and not is_multi_list(damages) and name_length == 1: # 部材名が1つの場合
-            picture_number_index = 0
+            picture_number_index = 0 # 写真番号は0から始める
             for single_damage in damages: 
                 parts_name = names[0]
                 pattern = r"(\d+)$"
@@ -641,19 +642,19 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                 else:
                     four_numbers = "00"
                 damage_name = flatten(single_damage)
-                print(f"parts_name1:{parts_name}")
-                print(f"damage_name1:{damage_name}")
+                print(f"parts_name1:{parts_name}") # 主桁 Mg0101
+                print(f"damage_name1:{damage_name}") # ㉓変形・欠損-c
                 parts_split = process_names(flatten(parts_name))
-                
-                this_time_picture_parts = this_time_picture.split(',')
-                for i, picture in enumerate(this_time_picture_parts):
+                print(f"this_time:{this_time_picture}")
+                list_in_picture = this_time_picture.split(",")
+                for single_picture in list_in_picture:
                     update_fields = {
                         'parts_name': parts_name,
                         'four_numbers': four_numbers,
                         'damage_name': damage_name,
                         'parts_split': parts_split,
                         'join': join,
-                        'this_time_picture': picture.strip(),
+                        'this_time_picture': single_picture,
                         'last_time_picture': last_time_picture,
                         'textarea_content': textarea_content,
                         'damage_coordinate_x': damage_coordinate_x,
@@ -666,53 +667,42 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                         'article': article,
                         'table': table
                     }
-                print(f"径間番号:{span_number}")
+                    print(f"update_fields：{update_fields}")
+                #print(f"径間番号:{span_number}")
                 # if FullReportData.objects.filter(join=join, this_time_picture=this_time_picture, span_number=span_number, table=table, damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y):
                     # update_fields['this_time_picture'] = ""
 
-                if update_fields['this_time_picture']:
-                    images = []
-                    if "," in update_fields['this_time_picture']:
-                        images = update_fields['this_time_picture'].split(',')
-                        comma_count = len(images) - 1
-                        print(f"写真枚数は{len(images)}枚です")
-
-                        box = list(range(picture_counter, picture_counter + len(images)))
-                        formatted_output = ', '.join(map(str, box))
-                        print(formatted_output)
-                        update_fields['picture_number'] = formatted_output
-                        picture_counter += len(images)
-                    else:
-                        images = [update_fields['this_time_picture']]
+                    if single_picture:
+                        images = [single_picture]
                         update_fields['picture_number'] = picture_counter
                         picture_counter += 1
-                    # BridgePictureモデルに保存
-                    if numbers_only is not None and numbers_only != '':
-                        print(f"images：{images}")
-                        for image_path in images:
-                            # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
-                            # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
-                            # print(settings.BASE_DIR)
-                            absolute_image_path = image_path
-                            print(f"absolute_image_path：{absolute_image_path}")
-                            try:
+                        # BridgePictureモデルに保存
+                        if numbers_only is not None and numbers_only != '':
+                            print(f"images：{images}") # ['写真パス1', '写真パス2']
+                            for image_path in images:
+                                # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
+                                # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
+                                # print(settings.BASE_DIR)
+                                absolute_image_path = image_path
+                                print(f"absolute_image_path：{absolute_image_path}") # 写真パス1（別データとして、写真パス2）
+                                try:
                                 # with open(absolute_image_path, 'rb') as image_file:
-                                    print(f"保存前：{numbers_only}")
-                                    print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
+                                    #print(f"保存前：{numbers_only}")
+                                    #print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
                                     if picture_number_index < len(picture_number_box):
                                         current_picture_number = picture_number_box[picture_number_index]
                                     else:
                                         current_picture_number = None
                                     print(f"保存後：{current_picture_number}")
-                                    print("---------")
+                                    #print("---------")
                                     if current_picture_number is None: # 写真がない
                                         join_picture_damage_name = BridgePicture.objects.filter(damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y, table=table, infra=infra, article=article)
-                                        print(join_picture_damage_name)
+                                        #print(join_picture_damage_name)
                                         if join_picture_damage_name.first():
                                             for picture in join_picture_damage_name:
-                                                print(picture)
+                                                #print(picture)
                                                 if picture.damage_name:
-                                                    print(picture.damage_name) # 損傷名
+                                                    #print(picture.damage_name) # 損傷名
                                                     edited_result_parts_name = re.sub(pattern, remove_alphabets, parts_split)
                                                     new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', damage_name)
                                                     # 末尾のハイフン+任意の1文字を削除
@@ -721,8 +711,8 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                 else:
                                                     picture.memo = f"{parts_split},{damage_name}"
                                                 picture.save()
-                                            print(join_picture_damage_name)
-                                        print("picture_number_boxのインデックスが範囲外です")
+                                            #print(join_picture_damage_name)
+                                        #print("picture_number_boxのインデックスが範囲外です")
                                         continue
                                     # 「スペース + 2文字以上のアルファベット + 2文字以上の数字」にマッチする部分を捉える
                                     pattern = r'\s+[A-Za-z]{2,}[0-9]{2,}'
@@ -766,11 +756,11 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                         )
                                         bridge_picture.save()
                                         picture_number_index += 1
-                            except FileNotFoundError:
-                                print(f"ファイルが見つかりません: {absolute_image_path}")
+                                except FileNotFoundError:
+                                    print(f"ファイルが見つかりません: {absolute_image_path}")
            
-                else:
-                    update_fields['picture_number'] = ""
+                    else:
+                        update_fields['picture_number'] = ""
                     
                 report_data_exists = FullReportData.objects.filter(**update_fields).exists()
                 if report_data_exists:
@@ -799,16 +789,16 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                     print(f"parts_name2:{parts_name}")
                     print(f"damage_name2:{damage_name}")
                     parts_split = process_names(flatten(parts_name))
-                    
-                    this_time_picture_parts = this_time_picture.split(',')
-                    for i, picture in enumerate(this_time_picture_parts):
+                    print(f"this_time:{this_time_picture}")
+                    list_in_picture = this_time_picture.split(",")
+                    for single_picture in list_in_picture:
                         update_fields = {
                             'parts_name': parts_name,
                             'four_numbers': four_numbers,
                             'damage_name': damage_name,
                             'parts_split': parts_split,
                             'join': join,
-                            'this_time_picture': picture.strip(),
+                            'this_time_picture': single_picture,
                             'last_time_picture': last_time_picture,
                             'textarea_content': textarea_content,
                             'damage_coordinate_x': damage_coordinate_x,
@@ -820,55 +810,43 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                             'infra': infra,
                             'article': article,
                             'table': table
-                        }        
-                    print(f"径間番号:{span_number}")                 
+                        }         
+                    #print(f"径間番号:{span_number}")                 
                     # if FullReportData.objects.filter(join=join, this_time_picture=this_time_picture, span_number=span_number, table=table, damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y):
                         # update_fields['this_time_picture'] = ""
                         # update_fields['picture_number'] = ""
                         
-                    if update_fields['this_time_picture']:
-                        images = []
-                        if "," in update_fields['this_time_picture']:
-                            images = update_fields['this_time_picture'].split(',')
-                            comma_count = len(images) - 1
-                            print(f"写真枚数は{len(images)}枚です")
-
-                            box = list(range(picture_counter, picture_counter + len(images)))
-                            formatted_output = ', '.join(map(str, box))
-                            print(formatted_output)
-                            update_fields['picture_number'] = formatted_output
-                            picture_counter += len(images)
-                        else:
-                            images = [update_fields['this_time_picture']]
+                        if single_picture:
+                            images = [single_picture]
                             update_fields['picture_number'] = picture_counter
                             picture_counter += 1
-                        # BridgePictureモデルに保存
-                        if numbers_only is not None and numbers_only != '':
-                            print(f"images：{images}")
-                            for image_path in images:
-                                # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
-                                # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
-                                # print(settings.BASE_DIR)
-                                absolute_image_path = image_path
-                                print(f"absolute_image_path：{absolute_image_path}")
-                                try:
+                            # BridgePictureモデルに保存
+                            if numbers_only is not None and numbers_only != '':
+                                print(f"images：{images}")
+                                for image_path in images:
+                                    # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
+                                    # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
+                                    # print(settings.BASE_DIR)
+                                    absolute_image_path = image_path
+                                    print(f"absolute_image_path：{absolute_image_path}")
+                                    try:
                                     # with open(absolute_image_path, 'rb') as image_file:
-                                        print(f"保存前：{numbers_only}")
-                                        print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
+                                        #print(f"保存前：{numbers_only}")
+                                        #print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
                                         if picture_number_index < len(picture_number_box):
                                             current_picture_number = picture_number_box[picture_number_index]
                                         else:
                                             current_picture_number = None
                                         print(f"保存後：{current_picture_number}")
-                                        print("---------")
+                                        #print("---------")
                                         if current_picture_number is None: # 写真がない
                                             join_picture_damage_name = BridgePicture.objects.filter(damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y, table=table, infra=infra, article=article)
-                                            print(join_picture_damage_name)
+                                            #print(join_picture_damage_name)
                                             if join_picture_damage_name.first():
                                                 for picture in join_picture_damage_name:
-                                                    print(picture)
+                                                    #print(picture)
                                                     if picture.damage_name:
-                                                        print(picture.damage_name) # 損傷名
+                                                        #print(picture.damage_name) # 損傷名
                                                         edited_result_parts_name = re.sub(pattern, remove_alphabets, parts_split)
                                                         new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', damage_name)
                                                         # 末尾のハイフン+任意の1文字を削除
@@ -877,8 +855,8 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                     else:
                                                         picture.memo = f"{parts_split},{damage_name}"
                                                     picture.save()
-                                                print(join_picture_damage_name)
-                                            print("picture_number_boxのインデックスが範囲外です")
+                                                #print(join_picture_damage_name)
+                                            #print("picture_number_boxのインデックスが範囲外です")
                                             continue
                                         # 「スペース + 2文字以上のアルファベット + 2文字以上の数字」にマッチする部分を捉える
                                         pattern = r'\s+[A-Za-z]{2,}[0-9]{2,}'
@@ -921,11 +899,11 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                             )
                                             bridge_picture.save()
                                             picture_number_index += 1
-                                except FileNotFoundError:
-                                    print(f"ファイルが見つかりません: {absolute_image_path}")
+                                    except FileNotFoundError:
+                                        print(f"ファイルが見つかりません: {absolute_image_path}")
              
-                    else:
-                        update_fields['picture_number'] = ""
+                        else:
+                            update_fields['picture_number'] = ""
                     
                     report_data_exists = FullReportData.objects.filter(**update_fields).exists()
                     if report_data_exists:
@@ -953,16 +931,16 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                         print(f"parts_name3:{parts_name}")
                         print(f"damage_name3:{damage_name}")
                         parts_split = process_names(flatten(parts_name))
-                        
-                        this_time_picture_parts = this_time_picture.split(',')
-                        for i, picture in enumerate(this_time_picture_parts):
+                        print(f"this_time:{this_time_picture}")
+                        list_in_picture = this_time_picture.split(",")
+                        for single_picture in list_in_picture:
                             update_fields = {
                                 'parts_name': parts_name,
                                 'four_numbers': four_numbers,
                                 'damage_name': damage_name,
                                 'parts_split': parts_split,
                                 'join': join,
-                                'this_time_picture': picture.strip(),
+                                'this_time_picture': single_picture,
                                 'last_time_picture': last_time_picture,
                                 'textarea_content': textarea_content,
                                 'damage_coordinate_x': damage_coordinate_x,
@@ -975,54 +953,42 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                 'article': article,
                                 'table': table
                             }
-                        print(f"径間番号:{span_number}")
+                        #print(f"径間番号:{span_number}")
                         # if FullReportData.objects.filter(join=join, this_time_picture=this_time_picture, span_number=span_number, table=table, damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y):
                             # update_fields['this_time_picture'] = ""
                             # update_fields['picture_number'] = ""
                             
-                        if update_fields['this_time_picture']:
-                            images = []
-                            if "," in update_fields['this_time_picture']:
-                                images = update_fields['this_time_picture'].split(',')
-                                comma_count = len(images) - 1
-                                print(f"写真枚数は{len(images)}枚です")
-
-                                box = list(range(picture_counter, picture_counter + len(images)))
-                                formatted_output = ', '.join(map(str, box))
-                                print(formatted_output)
-                                update_fields['picture_number'] = formatted_output
-                                picture_counter += len(images)
-                            else:
-                                images = [update_fields['this_time_picture']]
+                            if single_picture:
+                                images = [single_picture]
                                 update_fields['picture_number'] = picture_counter
                                 picture_counter += 1
-                            # BridgePictureモデルに保存
-                            if numbers_only is not None and numbers_only != '':
-                                print(f"images：{images}")
-                                for image_path in images:
-                                    # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
-                                    # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
-                                    # print(settings.BASE_DIR)
-                                    absolute_image_path = image_path
-                                    print(f"absolute_image_path：{absolute_image_path}")
-                                    try:
+                                # BridgePictureモデルに保存
+                                if numbers_only is not None and numbers_only != '':
+                                    print(f"images：{images}")
+                                    for image_path in images:
+                                        # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
+                                        # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
+                                        # print(settings.BASE_DIR)
+                                        absolute_image_path = image_path
+                                        print(f"absolute_image_path：{absolute_image_path}")
+                                        try:
                                         # with open(absolute_image_path, 'rb') as image_file:
-                                            print(f"保存前：{numbers_only}")
-                                            print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
+                                            #print(f"保存前：{numbers_only}")
+                                            #print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
                                             if picture_number_index < len(picture_number_box):
                                                 current_picture_number = picture_number_box[picture_number_index]
                                             else:
                                                 current_picture_number = None
                                             print(f"保存後：{current_picture_number}")
-                                            print("---------")
+                                            #print("---------")
                                             if current_picture_number is None: # 写真がない
                                                 join_picture_damage_name = BridgePicture.objects.filter(damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y, table=table, infra=infra, article=article)
-                                                print(join_picture_damage_name)
+                                                #print(join_picture_damage_name)
                                                 if join_picture_damage_name.first():
                                                     for picture in join_picture_damage_name:
-                                                        print(picture)
+                                                        #print(picture)
                                                         if picture.damage_name:
-                                                            print(picture.damage_name) # 損傷名
+                                                            #print(picture.damage_name) # 損傷名
                                                             edited_result_parts_name = re.sub(pattern, remove_alphabets, parts_split)
                                                             new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', damage_name)
                                                             # 末尾のハイフン+任意の1文字を削除
@@ -1032,7 +998,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                             picture.memo = f"{parts_split},{damage_name}"
                                                         picture.save()
                                                     
-                                                print("picture_number_boxのインデックスが範囲外です")
+                                                #print("picture_number_boxのインデックスが範囲外です")
                                                 continue
                                             # 「スペース + 2文字以上のアルファベット + 2文字以上の数字」にマッチする部分を捉える
                                             pattern = r'\s+[A-Za-z]{2,}[0-9]{2,}'
@@ -1075,11 +1041,11 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                 )
                                                 bridge_picture.save()
                                                 picture_number_index += 1
-                                    except FileNotFoundError:
-                                        print(f"ファイルが見つかりません: {absolute_image_path}")
+                                        except FileNotFoundError:
+                                            print(f"ファイルが見つかりません: {absolute_image_path}")
                       
-                        else:
-                            update_fields['picture_number'] = ""
+                            else:
+                                update_fields['picture_number'] = ""
                             
                         report_data_exists = FullReportData.objects.filter(**update_fields).exists()
                         if report_data_exists:
@@ -1104,20 +1070,20 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                             four_numbers = match.group(1)
                         else:
                             four_numbers = "00"
-                        damage_name = flatten(damage)
+                        original_damage_name = flatten(damage)
                         print(f"parts_name4:{parts_name}")
-                        print(f"damage_name4:{damage_name}")
+                        print(f"damage_name4:{original_damage_name}")
                         parts_split = process_names(flatten(parts_name))
-                        
-                        this_time_picture_parts = this_time_picture.split(',')
-                        for i, picture in enumerate(this_time_picture_parts):
+                        print(f"this_time:{this_time_picture}")
+                        list_in_picture = this_time_picture.split(",")
+                        for single_picture in list_in_picture:
                             update_fields = {
                                 'parts_name': parts_name,
                                 'four_numbers': four_numbers,
-                                'damage_name': damage_name,
+                                'damage_name': str(original_damage_name),
                                 'parts_split': parts_split,
                                 'join': join,
-                                'this_time_picture': picture.strip(),
+                                'this_time_picture': single_picture,
                                 'last_time_picture': last_time_picture,
                                 'textarea_content': textarea_content,
                                 'damage_coordinate_x': damage_coordinate_x,
@@ -1125,69 +1091,59 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                 'picture_coordinate_x': picture_coordinate_x,
                                 'picture_coordinate_y': picture_coordinate_y,
                                 'span_number': span_number,
-                                'special_links': '/'.join([str(parts_split), str(damage_name), str(span_number)]),
+                                'special_links': '/'.join([str(parts_split), str(original_damage_name), str(span_number)]),
                                 'infra': infra,
                                 'article': article,
                                 'table': table
                             }
-                        print(f"径間番号:{span_number}")
+                            print(f"update_fields：{update_fields}")
+                        #print(f"径間番号:{span_number}")
                         # if FullReportData.objects.filter(join=join, this_time_picture=this_time_picture, span_number=span_number, table=table, damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y):
                             # update_fields['this_time_picture'] = ""
                             # update_fields['picture_number'] = ""
                             
-                        if update_fields['this_time_picture']:
-                            images = []
-                            if "," in update_fields['this_time_picture']:
-                                images = update_fields['this_time_picture'].split(',')
-                                comma_count = len(images) - 1
-                                print(f"写真枚数は{len(images)}枚です")
-
-                                box = list(range(picture_counter, picture_counter + len(images)))
-                                formatted_output = ', '.join(map(str, box))
-                                print(formatted_output)
-                                update_fields['picture_number'] = formatted_output
-                                picture_counter += len(images)
-                            else:
-                                images = [update_fields['this_time_picture']]
+                            if single_picture:
+                                images = [single_picture]
                                 update_fields['picture_number'] = picture_counter
                                 picture_counter += 1
-                            # BridgePictureモデルに保存
-                            if numbers_only is not None and numbers_only != '':
-                                print(f"images：{images}")
-                                for image_path in images:
-                                    # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
-                                    # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
-                                    # print(settings.BASE_DIR)
-                                    absolute_image_path = image_path
-                                    print(f"absolute_image_path：{absolute_image_path}")
-                                    try:
+                                # BridgePictureモデルに保存
+                                if numbers_only is not None and numbers_only != '':
+                                    print(f"images：{images}")
+                                    for image_path in images:
+                                        # relative_image_path = os.path.join('infra/static/', image_path.strip().replace('\\', '/'))
+                                        # absolute_image_path = os.path.join(settings.BASE_DIR, relative_image_path)
+                                        # print(settings.BASE_DIR)
+                                        absolute_image_path = image_path
+                                        print(f"absolute_image_path：{absolute_image_path}")
+                                        try:
                                         # with open(absolute_image_path, 'rb') as image_file:
-                                            print(f"保存前：{numbers_only}")
-                                            print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
+                                            #print(f"保存前：{numbers_only}")
+                                            #print(f"オンリーナンバーズ（抽出後）: {picture_number_box}")
                                             if picture_number_index < len(picture_number_box):
                                                 current_picture_number = picture_number_box[picture_number_index]
                                             else:
                                                 current_picture_number = None
+                                                
                                             print(f"保存後：{current_picture_number}")
-                                            print("---------")
+                                            #print("---------")
                                             if current_picture_number is None: # 写真がない
                                                 join_picture_damage_name = BridgePicture.objects.filter(damage_coordinate_x=damage_coordinate_x, damage_coordinate_y=damage_coordinate_y, table=table, infra=infra, article=article)
-                                                print(join_picture_damage_name)
+                                                #print(join_picture_damage_name)
                                                 if join_picture_damage_name.first():
                                                     for picture in join_picture_damage_name:
-                                                        print(picture)
+                                                        #print(picture)
                                                         if picture.damage_name:
-                                                            print(picture.damage_name) # 損傷名
+                                                            #print(picture.damage_name) # 損傷名
                                                             edited_result_parts_name = re.sub(pattern, remove_alphabets, parts_split)
-                                                            new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', damage_name)
+                                                            new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', original_damage_name)
                                                             # 末尾のハイフン+任意の1文字を削除
                                                             damage_name = re.sub(r'-.{1}$', '', new_damage_name)
                                                             picture.memo = f"{picture.memo} / {parts_split},{damage_name}"
                                                         else:
                                                             picture.memo = f"{parts_split},{damage_name}"
                                                         picture.save()
-                                                    print(join_picture_damage_name)
-                                                print("picture_number_boxのインデックスが範囲外です")
+                                                    #print(join_picture_damage_name)
+                                                #print("picture_number_boxのインデックスが範囲外です")
                                                 continue
                                             # 「スペース + 2文字以上のアルファベット + 2文字以上の数字」にマッチする部分を捉える
                                             pattern = r'\s+[A-Za-z]{2,}[0-9]{2,}'
@@ -1198,8 +1154,11 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
 
                                             # re.subでパターンにマッチする部分を編集
                                             edited_result_parts_name = re.sub(pattern, remove_alphabets, parts_split)
-                                            new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', damage_name)
-                                            damage_name = re.sub(r'-.{1}$', '', new_damage_name)
+                                            print(original_damage_name)
+                                            new_damage_name = re.sub(r'^[\u2460-\u2473\u3251-\u3256]', '', original_damage_name)
+                                            print(new_damage_name)
+                                            # damage_name = re.sub(r'-.{1}$', '', new_damage_name)
+                                            # print(damage_name)
                                             existing_picture = BridgePicture.objects.filter(
                                                 picture_number=current_picture_number,
                                                 damage_coordinate_x=damage_coordinate_x,
@@ -1216,9 +1175,9 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                 bridge_picture = BridgePicture(
                                                     image=absolute_image_path, 
                                                     picture_number=current_picture_number,
-                                                    damage_name=damage_name,
+                                                    damage_name=original_damage_name,
                                                     parts_split=edited_result_parts_name,
-                                                    memo=f"{edited_result_parts_name},{damage_name}",
+                                                    memo=f"{edited_result_parts_name},{original_damage_name}",
                                                     damage_coordinate_x=damage_coordinate_x,
                                                     damage_coordinate_y=damage_coordinate_y,
                                                     picture_coordinate_x=picture_coordinate_x,
@@ -1230,11 +1189,11 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
                                                 )
                                                 bridge_picture.save()
                                                 picture_number_index += 1
-                                    except FileNotFoundError:
-                                        print(f"ファイルが見つかりません: {absolute_image_path}")
-                                
-                        else:
-                            update_fields['picture_number'] = ""
+                                        except FileNotFoundError:
+                                            print(f"ファイルが見つかりません: {absolute_image_path}")
+                                    
+                            else:
+                                update_fields['picture_number'] = ""
                         
                         report_data_exists = FullReportData.objects.filter(**update_fields).exists()
                         if report_data_exists:
@@ -1261,7 +1220,7 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     else:
         search_title_text = "1径間" # 検索URLにsearch_title_textがない場合
     second_search_title_text = "損傷図"
-    
+
     bridges = FullReportData.objects.filter(infra=pk, span_number=search_title_text) # 径間で絞り込み
     # parts_name のカスタム順序リスト
     parts_order = ['主桁', '横桁', '床版', 'PC定着部', '橋台[胸壁]', '橋台[竪壁]', '橋台[翼壁]', '支承本体', '沓座モルタル', '防護柵', '地覆', '伸縮装置', '舗装', '排水ます', '排水管']
@@ -1291,9 +1250,8 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
     
     picture_data = [] # ここで毎回初期化されます
     for data in bridges:
-        # クエリセットでフィルタリング(defの座標、径間番号、table、橋名、案件名が同じ)
+        # クエリセットでフィルタリング
         matches = BridgePicture.objects.filter(
-            image=data.this_time_picture,
             picture_coordinate_x=data.picture_coordinate_x,
             picture_coordinate_y=data.picture_coordinate_y,
             span_number=data.span_number,
@@ -1306,15 +1264,18 @@ def bridge_table(request, article_pk, pk): # idの紐付け infra/bridge_table.h
         for match in matches:
             # matches に QuerySet を含めるために新たに作成
             single_match_queryset = BridgePicture.objects.filter(id=match.id)
-            picture_data.append({"full_report": data, "matches": single_match_queryset})
-
+            match_details = [
+                {"id": obj.picture_number, "other_field": obj.image}  # 出力したい属性を列挙
+                for obj in single_match_queryset
+            ]
+                
+            picture_data.append({"full_report": data, "matches": single_match_queryset, "picture": match_details})
 
     print(f"写真重複チェック:{picture_data}")
     context = {'object': table_object, 'article_pk': article_pk, 'grouped_data': grouped_data, 'photo_grouped_data': photo_grouped_data, 'buttons': buttons, 'picture_data': picture_data}
     # 渡すデータ：　損傷データ　↑　　　       　   joinと損傷座標毎にグループ化したデータ　↑　　　　　　 写真毎にグループ化したデータ　↑ 　　       径間ボタン　↑
     # print(f"写真格納場所確認：{context}")
     # テンプレートをレンダリング
-    print(f"損傷写真帳：{context}")
     return render(request, 'infra/bridge_table.html', context)
     
 def ajax_file_send(request, pk):
@@ -1344,26 +1305,6 @@ def ajax_file_send(request, pk):
     else:
         # POSTメソッドでない場合はエラーレスポンスを返す
         return HttpResponseBadRequest('無効な作業です。') # Invalid request method
-
-# << 写真をアップロードしないでも表示させる >>
-def serve_image(request, file_path):
-    # セキュリティ: パスを安全にするため制限を加える
-    base_dir = os.path.abspath("C:/Users/dobokuka4/Desktop/(件名なし)/案件名/写真")
-    # エンコード
-    encoded_text = quote(base_dir)
-    # URLパスをデコード
-    # decoded_path = unquote(file_path)
-    # デバッグ用：デコードされたパスの確認
-    # print(f"Decoded path: {decoded_path}")
-    # OSに依存しない形でのパスの結合
-    full_path = os.path.normpath(os.path.join(encoded_text, file_path))
-    # デバッグ用：フルパスの確認
-    print(f"Full path: {full_path}")
-    # ファイルの存在を確認
-    if os.path.exists(full_path) and os.path.isfile(full_path):
-        return FileResponse(open(full_path, 'rb'))
-    else:
-        raise Http404("File not found")
 
 # << ファイルアップロード(プライマリーキーで分類分け) >>
 def upload_directory_path(instance, filename):
@@ -1401,7 +1342,6 @@ def observations_list(request, article_pk, pk):
     second_search_title_text = "損傷図"
     
     sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
-   #sorted_items = create_picturelist(request, table, dxf_filename, search_title_text, second_search_title_text)
     """"""
     # 全パーツデータを取得
 
@@ -1409,6 +1349,10 @@ def observations_list(request, article_pk, pk):
     print(f"infra_name:{infra_name}")
     parts_data = PartsNumber.objects.filter(infra=pk)
     print(f"parts_data:{parts_data}")
+    
+    article = Article.objects.filter(id=article_pk).first()
+    infra = Infra.objects.filter(id=pk).first()
+    table = Table.objects.filter(infra=pk).first()    
     
     material_replace_map = {
         "鋼": "S",
@@ -1581,22 +1525,21 @@ def observations_list(request, article_pk, pk):
             damage_comments[(result_parts_name, damage_name)]['article'] = part.article
 
     for (result_parts_name, damage_name), data in damage_comments.items():
+        print("1571行目")
         damage_lanks = data['damage_lanks']
         damage_max_lank = max(damage_lanks)
         damage_min_lank = min(damage_lanks)
         
-        before_combined_pictures = ','.join(str(picture) for picture in set(data['this_time_pictures']) if picture is not None) # 重複なし
-        def transform_string(changed_comma: str) -> str:
-            # 先頭の1文字がコンマのとき、先頭の文字を削除
-            if changed_comma.startswith(","):
-                changed_comma = changed_comma[1:]
-            # 文字列の中にコンマが2連続していた場合、コンマに置換
-            changed_comma = changed_comma.replace(",,", ",")
-            return changed_comma
+        start_comma_pictures = ','.join(str(picture) for picture in set(data['this_time_pictures']) if picture is not None) # 重複なし
+        # double_comma_picturesにデフォルト値を設定
+        double_comma_pictures = start_comma_pictures
         
-        combined_pictures = transform_string(before_combined_pictures)
+        if start_comma_pictures.startswith(","):
+            double_comma_pictures = start_comma_pictures[1:]
+        before_combined_pictures = double_comma_pictures.replace(",,", ",")
+        print(f"before_combined_pictures：{before_combined_pictures}")
 
-        # << 管理サイトに登録するコード >>
+        # << 管理サイトに登録するコード（所見） >>
         try:
             damage_comment_entry, created = DamageComment.objects.get_or_create(
                 parts_name=result_parts_name,
@@ -1609,7 +1552,7 @@ def observations_list(request, article_pk, pk):
                     'main_parts': data['main_parts'],
                     'damage_max_lank': damage_max_lank,
                     'damage_min_lank': damage_min_lank,
-                    'this_time_picture': combined_pictures
+                    'this_time_picture': before_combined_pictures
                 }
             )
             if not created:
@@ -1618,7 +1561,7 @@ def observations_list(request, article_pk, pk):
                 damage_comment_entry.main_parts = data['main_parts']
                 damage_comment_entry.damage_max_lank = damage_max_lank
                 damage_comment_entry.damage_min_lank = damage_min_lank
-                damage_comment_entry.this_time_picture = combined_pictures
+                damage_comment_entry.this_time_picture = before_combined_pictures
                 damage_comment_entry.save()
 
         except IntegrityError:
@@ -1628,6 +1571,9 @@ def observations_list(request, article_pk, pk):
             continue  # 次のループに進む
         
         # BridgePictureからのimageを取得し、damage_comment_entryに追加する
+        print("1619行目")
+        print(result_parts_name) # 主桁 04
+        print(damage_name) # 剥離・鉄筋露出
         bridge_pictures = BridgePicture.objects.filter(
             memo__contains=f"{result_parts_name},{damage_name}", # __contains：部分一致
             span_number=f"{data['span_number']}径間",
@@ -1642,8 +1588,20 @@ def observations_list(request, article_pk, pk):
         print(data['article']) # サンプル
         print("ヒット**")
         images = []
+        
+        def remove_unwanted_prefix(text):
+            # 「https:/」を探して、それ以前の部分を削除する
+            parts = text.split('https:/', 1)
+            if len(parts) > 1:
+                return 'https:/' + parts[1]
+            else:
+                return None
+
         for picture in bridge_pictures:
-            images.append(picture.image.url)
+            decoded_url = unquote(picture.image.url)
+            print(f"写真パス：{decoded_url}")
+            images.append(decoded_url)
+            # images.append(remove_unwanted_prefix(decoded_url))
             print(picture)
 
         damage_comment_entry.images = images
@@ -1672,15 +1630,15 @@ def observations_list(request, article_pk, pk):
 
     print("所見引き渡しID確認")
     infra = Infra.objects.filter(id=pk).first()
-    print(f"Infra:{infra}") # 旗揚げチェック(4)
-    print(f"Infra:{infra.id}") # 旗揚げチェック(4)
+    print(f"Infra:{infra}") # 橋梁名
+    print(f"Infra:{infra.id}") # 20
     article = infra.article
-    print(f"article:{article}") # お試し(2)
-    print(f"article:{article.id}") # お試し(2)
+    print(f"article:{article}") # 案件名
+    print(f"article:{article.id}") # 1
     observer_object = infra
     print(f"使用写真：{images}")
     print("------------------")
-    return render(request, 'observer_list.html', {'object': observer_object, 'article_pk': article_pk, 'data': filtered_bridges, 'article_pk': article_pk, 'pk': pk, 'buttons': buttons, 'images': images})
+    return render(request, 'infra/observer_list.html', {'object': observer_object, 'article_pk': article_pk, 'data': filtered_bridges, 'article_pk': article_pk, 'pk': pk, 'buttons': buttons, 'images': images})
 
 # << 所見コメントの登録 >>
 def damage_comment_edit(request, pk):
@@ -2876,7 +2834,7 @@ def find_square_around_text(article_pk, pk, dxf_filename, search_title_text, sec
     object_key = f'{article.案件名}/{infra.title}/{infra.title}.dxf'
     
     # ファイルパスにファイル名を含める
-    local_file_path = f'{str(Path.home() / "Desktop")}/intect_dxf/{article.案件名}/{infra.title}/{infra.title}.dxf'
+    local_file_path = f'{str(Path.home() / "Desktop")}\intect_dxf\{article.案件名}\{infra.title}\{infra.title}.dxf'
 
     def download_dxf_from_s3(bucket_name, object_key, local_file_path):
         s3 = boto3.client('s3')
@@ -3770,7 +3728,7 @@ def create_picturelist(request, table, dxf_filename, search_title_text, second_s
                  'picture_number': third, 'this_time_picture': picture_urls, 'last_time_picture': None, 'textarea_content': combined_data, 
                  'damage_coordinate': damage_coordinate[i], 'picture_coordinate': picture_coordinate[i]}
         damage_table.append(items)
-
+    
     #優先順位の指定
     order_dict = {"主桁": 1, "横桁": 2, "床版": 3, "PC定着部": 4, "橋台[胸壁]": 5, "橋台[竪壁]": 6, "支承本体": 7, "沓座モルタル": 8, "防護柵": 9, "地覆": 10, "伸縮装置": 11, "舗装": 12, "排水ます": 13, "排水管": 14}
     order_number = {"None": 0, "①": 1, "②": 2, "③": 3, "④": 4, "⑤": 5, "⑥": 6, "⑦": 7, "⑧": 8, "⑨": 9, "⑩": 10, "⑪": 11, "⑫": 12, "⑬": 13, "⑭": 14, "⑮": 15, "⑯": 16, "⑰": 17, "⑱": 18, "⑲": 19, "⑳": 20, "㉑": 21, "㉒": 22, "㉓": 23, "㉔": 24, "㉕": 25, "㉖": 26}

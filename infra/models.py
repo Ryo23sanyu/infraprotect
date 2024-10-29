@@ -236,7 +236,7 @@ class BridgePicture(models.Model):
     class Meta:
         # ユニークの設定(fieldsの組み合わせを一意とする。nullが許可されているとデータが重複する可能性があるため、notnullの要素を扱う)
         constraints = [
-            models.UniqueConstraint(fields=['picture_number', 'damage_coordinate_x', 'damage_coordinate_y', 'span_number', 'table', 'infra', 'article'], name='unique_bridge_picture')
+            models.UniqueConstraint(fields=['image', 'damage_coordinate_x', 'damage_coordinate_y', 'span_number', 'table', 'infra', 'article'], name='unique_bridge_picture')
         ]
 # models.TextField()：文字数上限なし
 
@@ -267,7 +267,7 @@ class FullReportData(models.Model):
     class Meta:
         # ユニークの設定(fieldsの組み合わせを一意とする。nullが許可されているとデータが重複する可能性があるため、notnullの要素を扱う)
         constraints = [
-            models.UniqueConstraint(fields=['parts_name', 'damage_name', 'parts_split', 'join', 'infra', 'article',
+            models.UniqueConstraint(fields=['parts_name', 'damage_name', 'parts_split', 'join', 'this_time_picture', 'infra', 'article',
                                             'damage_coordinate_x', 'damage_coordinate_y', 'span_number', 'special_links'], name='unique_parts_damage')
         ]
     def __str__(self):

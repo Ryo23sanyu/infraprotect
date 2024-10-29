@@ -129,7 +129,7 @@
         <td id="parts_name_{{ forloop.counter }}">{{ item.main_parts }}</td>
         <td id="parts_name_{{ forloop.counter }}">{{ item.parts_name }}</td>
         <td id="damage_name_{{ forloop.counter }}">{{ item.damage_name }}<br>
-          [{% if item.damage_max_lank == item.damage_min_lank %}
+           [{% if item.damage_max_lank == item.damage_min_lank %}
               {{ item.damage_max_lank }} 
            {% else %}
               {{ item.damage_max_lank }} ～ {{ item.damage_min_lank }} {% endif %}]
@@ -137,13 +137,13 @@
         <td>
           <div class="image-scroll-container">
             {% if item.this_time_picture %}
-            {% for picture in item.this_time_picture|split_comma %}
-                <p>{{ item.images }}</p>    
-                <p>{{ image }}</p>
-                <img id="photo_{{ forloop.counter }}" src="{% static picture.strip %}" alt="損傷写真">
-              {% endfor %}
+
+                    {% for picture_url in item.this_time_picture|split_comma %}
+                        <img id="photo_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" src="{{ picture_url }}" alt="損傷写真">
+                    {% endfor %}
+ 
             {% else %}
-              <img src="{% static 'infra/noImage.png' %}" alt="サンプル画像">
+                <img src="{% static 'infra/noImage.png' %}" alt="サンプル画像">
             {% endif %}
           </div>
         </td>
