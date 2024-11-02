@@ -5,10 +5,11 @@ from infra.models import BridgePicture
 
 register = template.Library()
 
-def split_comma(value):
+@register.filter
+def split_comma(value, delimiter=','):
     if not value:
         return []
-    return value.split(",")
+    return value.split(delimiter)
 
 @register.filter
 def split(value, delimiter=','):
