@@ -15,7 +15,7 @@ class InfraAdmin(admin.ModelAdmin): # 橋梁
 admin.site.register(Infra, InfraAdmin)
 
 class ArticleAdmin(admin.ModelAdmin): # 案件
-    list_display = ('案件名', '土木事務所', '対象数', 'その他', 'ファイルパス')
+    list_display = ('案件名', '土木事務所', '対象数', 'その他')
 admin.site.register(Article, ArticleAdmin)
 
 admin.site.register(Regulation) # 道路規制

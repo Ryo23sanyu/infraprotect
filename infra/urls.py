@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from .import views
-from .views import get_subdirectories
 
 # urlパスの設定は何を意味しているのか、ぱっと見でわかるように作成する
 # 例：article/<int:article_pk>/infra/<int:pk>/update/（article〇番のinfra△番の更新ページ）
@@ -21,7 +20,6 @@ urlpatterns = [
     # << 案件関係 >>
     path('article/', views.ListArticleView.as_view(), name='list-article'),# 案件の一覧
     path('article/create/', views.CreateArticleView.as_view(), name='create-article'),# 案件の登録
-    path('get-subdirectories/', get_subdirectories, name='get-subdirectories'),
     path('article/<int:pk>/detail/', views.DetailArticleView.as_view(), name='detail-article'),# 案件のデータ内容
     path('article/<int:pk>/delete/', views.DeleteArticleView.as_view(), name='delete-article'),# 案件の削除
     path('article/<int:pk>/update/', views.UpdateArticleView.as_view(), name='update-article'),# 案件の更新

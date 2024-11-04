@@ -230,7 +230,7 @@ class DeleteArticleView(LoginRequiredMixin, DeleteView):
 class UpdateArticleView(LoginRequiredMixin, UpdateView):
     template_name = 'infra/article_update.html'
     model = Article
-    fields = ('案件名', '土木事務所', '対象数', '担当者名', 'その他', 'ファイルパス')
+    fields = ('案件名', '土木事務所', '対象数', '担当者名', 'その他')
     success_url = reverse_lazy('list-article')
 
 # << ファイルのアップロード・各infraに紐付け >>
