@@ -2839,7 +2839,6 @@ def find_square_around_text(article_pk, pk, dxf_filename, search_title_text, sec
     object_key = f'{article.案件名}/{infra.title}/{infra.title}.dxf'
     
     # ファイルパスにファイル名を含める
-    # local_file_path = f'{str(Path.home() / "Desktop")}\intect_dxf\{article.案件名}\{infra.title}\{infra.title}.dxf'
     local_file_path = os.path.join(str(Path.home() / "Desktop"), "intect_dxf", article.案件名, infra.title, f'{infra.title}.dxf')
     def download_dxf_from_s3(bucket_name, object_key, local_file_path):
         s3 = boto3.client('s3')
