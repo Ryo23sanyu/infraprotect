@@ -7,10 +7,6 @@ from django.core.files.storage import default_storage
 from .models import Article, BridgePicture, DamageComment, FullReportData, Image, Infra, Regulation, UploadedFile
 from .models import Photo, Table, NameEntry, PartsNumber
 from django.core.exceptions import ValidationError
-
-# 写真フォルダの複数アップロード
-class PictureUploadForm(forms.Form):
-    zip_file = forms.FileField(label='ZIPファイルを選択してください')
         
 # ファイルアップロード
 class FileUploadForm(forms.ModelForm):
@@ -161,7 +157,7 @@ class EditReportDataForm(forms.ModelForm):
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ['案件名', '土木事務所', '対象数', '担当者名', 'その他', 'ファイルパス']
+        fields = ['案件名', '土木事務所', '対象数', '担当者名', 'その他']
         
 class InfraForm(forms.ModelForm):
     class Meta:

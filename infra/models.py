@@ -5,14 +5,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 
-# 会社別に表示
-# class CustomUser(AbstractUser):
-#     company = models.CharField(max_length=100)
-
-# class Company(models.Model):
-#     name = models.CharField(max_length=100)
-
-
 # 写真シート
 class Panorama(models.Model):
     image = models.ImageField(upload_to='panorama/')
@@ -55,7 +47,6 @@ class Article(models.Model):
     対象数 = models.IntegerField()# 対象数 number
     担当者名 = models.CharField(max_length=100)# 担当者名 namager
     その他 = models.CharField(max_length=100)# その他 other
-    ファイルパス = models.CharField(max_length=255)# 写真ファイルパス
     def __str__(self):
         return self.案件名
 
@@ -136,14 +127,6 @@ class Infra(models.Model):
     
     def __str__(self):
         return self.title
-
-# << 写真フォルダの複数アップロード >>
-class UploadLog(models.Model):
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    file_name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.file_name
     
 # << ファイルアップロード >>
 class UploadedFile(models.Model):

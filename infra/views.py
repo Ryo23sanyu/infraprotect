@@ -45,7 +45,7 @@ from django.db.models.functions import Cast, Replace, Substr, Length
 # from infraprotect import settings
 from django.conf import settings
 from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
-from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, PictureUploadForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
+from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
 from urllib.parse import quote, unquote
 from ezdxf.enums import TextEntityAlignment
 import logging
@@ -64,13 +64,6 @@ class ListInfraView(LoginRequiredMixin, ListView):
     def get_queryset(self, **kwargs):
         # モデル検索のクエリー。Infra.objects.all() と同じ結果で全ての Infra
         queryset = super().get_queryset(**kwargs)
-        # パスパラメータpkによりarticleを求める
-        # 指定されたpk(idの指定)のデータを取得
-# article  = Article.objects.get(id = self.kwargs["pk"])
-        # get使用すると、存在しない場合エラーになってしまう
-        # 求めたarticleを元にモデル検索のクエリーを絞り込む
-        # infra_objectフィルタ－
-        #queryset = queryset.filter(article=article)
         queryset = queryset.filter(article = self.kwargs["article_pk"])
         # 絞り込んだクエリーをDjangoに返却し表示データとしてもらう
         return queryset
@@ -226,49 +219,8 @@ class DetailArticleView(LoginRequiredMixin, DetailView):
 class CreateArticleView(LoginRequiredMixin, CreateView):
     template_name = 'infra/article_create.html'
     model = Article
-    fields = ('案件名', '土木事務所', '対象数', '担当者名', 'その他', 'ファイルパス')
+    fields = ('案件名', '土木事務所', '対象数', '担当者名', 'その他')
     success_url = reverse_lazy('list-article')
-
-    def get_initial(self):
-        initial = super().get_initial()
-        selected_file = self.request.COOKIES.get('selected_file')
-        if selected_file:
-            initial['ファイルパス'] = selected_file
-        return initial
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # root_dir = os.path.expanduser('~') # Cドライブのユーザーディレクトリ
-        user_home_dir = os.path.expanduser('~')
-        root_dir = os.path.join(user_home_dir, 'Desktop') # デスクトップディレクトリ
-        context['root_dir'] = root_dir
-        return context
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        response.delete_cookie('selected_file')
-        return response
-
-def get_subdirectories(request):
-    # | をバックスラッシュに戻します
-    path = unquote(request.GET.get('path', ''))
-    if not path:
-        return JsonResponse({'directories': [], 'files': []}, status=400)
-
-    subdirectories = []
-    files = []
-
-    try:
-        with os.scandir(path) as it:
-            for entry in it:
-                if entry.is_dir():
-                    subdirectories.append(entry.name)
-                elif entry.is_file():
-                    files.append(entry.name)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
-
-    return JsonResponse({'directories': subdirectories, 'files': files})
     
 class DeleteArticleView(LoginRequiredMixin, DeleteView):
     template_name = 'infra/article_delete.html'
@@ -293,11 +245,6 @@ def file_upload(request, article_pk, pk):
         print(f"Infra:{infra}({infra.id})") # 旗揚げチェック(4)
         print(f"article:{article}({article.id})") # お試し(2)
     
-    # try:
-    #     infra = Infra.objects.get(id=pk)
-    #     article = infra.article
-    #     print(f'infra:{infra}')
-    #     print(f'articl:{article}')
     except Infra.DoesNotExist:
         logger.error(f"インフラ {pk} が存在しません")
         return render(request, 'infra/file_upload.html', {
