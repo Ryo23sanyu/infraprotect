@@ -4,9 +4,13 @@ import datetime
 from django import forms
 from django.core.files.storage import default_storage
 
-from .models import Article, BridgePicture, DamageComment, FullReportData, Infra, Regulation, UploadedFile
-from .models import Table, NameEntry, PartsNumber
+from .models import Article, BridgePicture, DamageComment, FullReportData, Image, Infra, Regulation, UploadedFile
+from .models import Photo, Table, NameEntry, PartsNumber
 from django.core.exceptions import ValidationError
+
+# 写真フォルダの複数アップロード
+class PictureUploadForm(forms.Form):
+    zip_file = forms.FileField(label='ZIPファイルを選択してください')
         
 # ファイルアップロード
 class FileUploadForm(forms.ModelForm):
@@ -92,6 +96,18 @@ class NameForm(forms.Form):
     name = forms.CharField(label='名前')
     folder_path = forms.CharField(label='フォルダパス')
     
+
+# 全景写真用
+class UploadForm(forms.ModelForm): # UploadFormという名前のFormクラスを定義(Modelクラスと紐付け)
+    photo = forms.ImageField() # modelに定義されているものを使用
+    class Meta: # ModelFormと紐付ける場合に記載
+        model = Image # models.pyのImageクラスと紐付け
+        fields = ['photo'] # Image.modelのphotoフィールドのみを使用
+        
+class PhotoUploadForm(forms.ModelForm): # PhotoUploadFormという名前のFormクラスを定義(Modelクラスと紐付け)
+    class Meta: # ModelFormと紐付ける場合に記載
+        model = Photo # models.pyのPhotoクラスと紐付け
+        fields = ['image'] # このFormで扱うフィールドを指定
         
 # 損傷写真変更用(Ajax)
 class FileUploadSampleForm(forms.Form):

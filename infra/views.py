@@ -44,11 +44,19 @@ from django.db.models import Q, Value, IntegerField, Case, When, F
 from django.db.models.functions import Cast, Replace, Substr, Length
 # from infraprotect import settings
 from django.conf import settings
-from .models import Approach, Article, BridgePicture, DamageComment, DamageList, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
-from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, TableForm, NameForm, ArticleForm
+from .models import Approach, Article, BridgePicture, DamageComment, DamageList, DamageReport, FullReportData, Infra, PartsName, PartsNumber, Table, LoadGrade, LoadWeight, Photo, Panorama, NameEntry, Regulation, Rulebook, Thirdparty, UnderCondition, Material
+from .forms import BridgeCreateForm, BridgeUpdateForm, CensusForm, DamageCommentCauseEditForm, DamageCommentEditForm, DamageCommentJadgementEditForm, EditReportDataForm, FileUploadForm, FullReportDataEditForm, NameEntryForm, PartsNumberForm, PictureUploadForm, TableForm, UploadForm, PhotoUploadForm, NameForm, ArticleForm
 from urllib.parse import quote, unquote
 from ezdxf.enums import TextEntityAlignment
 import logging
+
+# 500エラーの際に詳細を表示
+@requires_csrf_token
+def my_customized_server_error(request, template_name='500.html'):
+    import sys
+    from django.views import debug
+    error_html = debug.technical_500_response(request, *sys.exc_info()).content
+    return HttpResponseServerError(error_html)
 
 class ListInfraView(LoginRequiredMixin, ListView):
     template_name = 'infra/infra_list.html'
@@ -56,7 +64,13 @@ class ListInfraView(LoginRequiredMixin, ListView):
     def get_queryset(self, **kwargs):
         # モデル検索のクエリー。Infra.objects.all() と同じ結果で全ての Infra
         queryset = super().get_queryset(**kwargs)
-
+        # パスパラメータpkによりarticleを求める
+        # 指定されたpk(idの指定)のデータを取得
+# article  = Article.objects.get(id = self.kwargs["pk"])
+        # get使用すると、存在しない場合エラーになってしまう
+        # 求めたarticleを元にモデル検索のクエリーを絞り込む
+        # infra_objectフィルタ－
+        #queryset = queryset.filter(article=article)
         queryset = queryset.filter(article = self.kwargs["article_pk"])
         # 絞り込んだクエリーをDjangoに返却し表示データとしてもらう
         return queryset
@@ -320,6 +334,39 @@ def file_upload(request, article_pk, pk):
 
 def file_upload_success(request):
     return render(request, 'infra/file_upload_success.html')
+  
+def photo_list(request):
+    photos = Photo.objects.all()
+    return render(request, 'infra/photo_list.html', {'photos': photos})
+
+def selected_photos(request):
+    selected_photo_ids = request.POST.getlist('selected_photos')
+    selected_photos = Photo.objects.filter(id__in=selected_photo_ids)
+    return render(request, 'infra/selected_photos.html', {'selected_photos': selected_photos})
+
+
+def panorama_list(request):
+    panoramas = Panorama.objects.all()
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('image_list')
+        for panorama in panoramas:
+            if str(panorama.id) in selected_ids:
+                panorama.checked = True
+            else:
+                panorama.checked = False
+            panorama.save()
+        return redirect('image_list')  # 再描画のためにリダイレクト
+    
+    return redirect('image_list')
+    #return render(request, 'image_list.html', {'panoramas': panoramas})
+
+def panorama_upload(request):
+    if request.method == 'POST':
+        image = request.FILES['image']
+        checked = request.POST.get('checked', False)
+        panorama = Panorama.objects.create(image=image, checked=checked)
+        return redirect('photo')
+    return render(request, 'panorama_upload.html')
 
 # << センサス調査 >>
 def census_view(request):
@@ -1362,6 +1409,16 @@ def ajax_file_send(request, pk):
     else:
         # POSTメソッドでない場合はエラーレスポンスを返す
         return HttpResponseBadRequest('無効な作業です。') # Invalid request method
+
+# << ファイルアップロード(プライマリーキーで分類分け) >>
+def upload_directory_path(instance, filename):
+    # プライマリーキーを取得する
+    primary_key = instance.pk
+    # 'documents/プライマリーキー/filename' のパスを返す
+    return 'uploads/{}/{}'.format(primary_key, filename)
+
+# class Upload(models.Model):
+#     file = models.FileField(upload_to=upload_directory_path)
 
 # << 所見一覧 >>
 def observations_list(request, article_pk, pk):
@@ -2477,7 +2534,55 @@ def excel_output(request, article_pk, pk):
         sheet.print_area = print_area    
         
         hide_sheet.sheet_state = 'hidden'
-     
+    
+    """
+    # 写真を貼る動作を関数化
+    def process_image_to_excel(this_image_path, static_files_dir, i10, ws, max_width, max_height):   
+        # (関数化に必要なデータ：1つ目　受け取る変数)     
+        decoded_picture_path = urllib.parse.unquote(this_image_path) # URLデコード
+        print(decoded_picture_path)
+        sub_image_path = os.path.join(static_files_dir, decoded_picture_path.lstrip('/'))
+        print(sub_image_path)
+        print("2")
+        full_image_path = sub_image_path.replace("/", "\\")
+        print(full_image_path)
+        if os.path.exists(full_image_path):
+            print('true')
+            print(full_image_path)
+            # 画像を開いてリサイズ
+            pil_img = pil_img = PILImage.open(full_image_path)
+            width, height = pil_img.size
+            aspect_ratio = width / height
+
+            if aspect_ratio > max_width / max_height:
+                new_width = min(width, max_width)
+                new_height = new_width / aspect_ratio
+            else:
+                new_height = min(height, max_height)
+                new_width = new_height * aspect_ratio
+
+            resized_img = pil_img.resize((int(new_width), int(new_height)))
+
+            # 一時ファイル用のテンポラリディレクトリを作成
+            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+                resized_img_path = tmp.name
+
+            # 画像を一時ファイルに保存
+            resized_img.save(resized_img_path)
+
+            # openpyxl用の画像オブジェクトを作成
+            img = OpenpyxlImage(resized_img_path)
+
+            # セルの位置に画像を貼り付け
+            img.anchor = i10
+            ws.add_image(img)
+            i10 += 1  # カウンタを進める」
+            return i10  # 更新されたカウンタを返す(関数化に必要なデータ：2つ目　返すデータ)
+        else:
+            print('false')
+            return i10  # 更新されたカウンタを返す(関数化に必要なデータ：2つ目　返すデータ)
+    """       
+                    
     # 全ての結果を入れるリスト
     joined_results = []
 
@@ -2647,7 +2752,69 @@ def excel_output(request, article_pk, pk):
             print(record['textarea_content'])
             i10 += 1
             print(i10)
+            """
+            list_picture_paths = []  # 写真番号と写真パスの組み合わせを格納
 
+            # damage_picture_data の画像をすべてリストに追加
+            for picture_data in damage_picture_data:
+                if picture_data.image is not None:
+                    picture_path = picture_data.image
+                    picture_number = picture_data.picture_number
+                else:
+                    picture_path = None
+                    picture_number = None
+                list_picture_paths.append((picture_path, picture_number))
+                
+
+            # 各写真データについて entry を生成し、saving_output_data に追加
+            for pic in range(len(list_picture_paths)):            
+                entry = {
+                    'span_number': span_number,
+                    'picture_number': list_picture_paths[pic][1],
+                    'this_time_picture': list_picture_paths[pic][0],
+                    'parts_name': parts_name,
+                    'parts_number': parts_number,
+                    'damage_name': damage_name,
+                    'damage_lank': damage_lank,
+                    'textarea_content': record.textarea_content
+                }
+                # 重複を確認し、存在しない場合のみsaving_output_dataに追加
+                if not any(e['picture_number'] == entry['picture_number'] and e['span_number'] == entry['span_number'] for e in saving_output_data):
+                # any：1つでもTrueなら
+                    saving_output_data.append(entry)
+
+            print(f"格納写真データ：{list_picture_paths}")
+                
+
+            if "," in record.this_time_picture:
+                pictures = record.this_time_picture.split(",")
+                for picture in pictures:
+                    # データを新たに作成してsaving_output_dataリストに保存
+                    entry = {
+                        'picture_number': picture_data.image,
+                        'picture_path': picture_data.picture_number,
+                        'parts_name': parts_name,
+                        'parts_number': parts_number,
+                        'damage_name': damage_name,
+                        'damage_lank': damage_lank,
+                        'textarea_content': record.textarea_content
+                    }
+                    saving_output_data.append(entry)
+            else:
+                # コンマが含まれていない場合もデータを保存
+                entry = {
+                    'picture_number': picture_data.image,
+                    'picture_path': picture_data.picture_number,
+                    'parts_name': parts_name,
+                    'parts_number': parts_number,
+                    'damage_name': damage_name,
+                    'damage_lank': damage_lank,
+                    'textarea_content': record.textarea_content
+                }
+                saving_output_data.append(entry)
+
+            print(f"エクセルに貼る写真：{record.this_time_picture}")
+            """   
     # << Django管理サイトからデータを取得（その１１、１２用） >>
     no1112_records = DamageList.objects.filter(infra=pk, article=article_pk)
     # 並び替え
@@ -2806,6 +2973,7 @@ def find_square_around_text(article_pk, pk, dxf_filename, search_title_text, sec
     object_key = f'{article.案件名}/{infra.title}/{infra.title}.dxf'
     
     # ファイルパスにファイル名を含める
+    # local_file_path = f'{str(Path.home() / "Desktop")}\intect_dxf\{article.案件名}\{infra.title}\{infra.title}.dxf'
     local_file_path = os.path.join(str(Path.home() / "Desktop"), "intect_dxf", article.案件名, infra.title, f'{infra.title}.dxf')
     def download_dxf_from_s3(bucket_name, object_key, local_file_path):
         s3 = boto3.client('s3')
@@ -3890,3 +4058,31 @@ def edit_send_data(request, damage_pk, table_pk):
         return JsonResponse({"status": "success", 'current_text': current_text})
 
     return render(request, 'infra/bridge_table.html', {'report_data': report_data})
+
+# << 写真フォルダの複数アップロード >>
+def picture_upload_view(request):
+    # S3クライアントを作成
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name='ap-northeast-1'
+    )
+
+    # リクエストからファイル名を取得
+    file_name = request.POST.get('file_name')
+    if not file_name:
+        return JsonResponse({'error': 'ファイル名が必要です'}, status=400)
+
+    # プリサインドURLを生成
+    presigned_url = s3_client.generate_presigned_url(
+        'put_object',
+        Params={
+            'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+            'Key': file_name,
+            'ContentType': 'application/zip',
+        },
+        ExpiresIn=3600  # URLの有効期間（秒）
+    )
+    
+    return JsonResponse({'url': presigned_url})

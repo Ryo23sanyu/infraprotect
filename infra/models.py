@@ -5,10 +5,46 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 
+# 会社別に表示
+# class CustomUser(AbstractUser):
+#     company = models.CharField(max_length=100)
+
+# class Company(models.Model):
+#     name = models.CharField(max_length=100)
+
+
+# 写真シート
+class Panorama(models.Model):
+    image = models.ImageField(upload_to='panorama/')
+    checked = models.BooleanField(default=False)
+    # チェックボックスの状態を保存するフィールド
+    # is_checked = models.BooleanField(default=False)
+
 # ファイルアップロード(プライマリーキーで分類分け)
 class Uploads(models.Model):
     primary_key = models.AutoField(primary_key=True)
     file = models.FileField(upload_to='uploads/')
+
+class Damage(models.Model):
+    notes = models.TextField(blank=True, null=True)
+
+# 全景写真
+class Photo(models.Model):
+    image = models.ImageField(upload_to='photos/')
+
+class Image(models.Model):
+    #title = models.CharField(max_length=255) # 画像のタイトル
+    photo = models.ImageField(upload_to='photos/') # 画像ファイル, 'photos/'はMEDIA_ROOT下の保存先ディレクトリ
+
+    def __str__(self):
+        return self.photo
+
+# 損傷メモ
+class DamageReport(models.Model):
+    first = models.CharField(max_length=100)
+    second = models.TextField()
+
+
 
 # << ディレクトリの動的変更 >>
 # << 案件作成のモデル >>
@@ -100,6 +136,14 @@ class Infra(models.Model):
     
     def __str__(self):
         return self.title
+
+# << 写真フォルダの複数アップロード >>
+class UploadLog(models.Model):
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.file_name
     
 # << ファイルアップロード >>
 class UploadedFile(models.Model):
