@@ -320,39 +320,6 @@ def file_upload(request, article_pk, pk):
 
 def file_upload_success(request):
     return render(request, 'infra/file_upload_success.html')
-  
-def photo_list(request):
-    photos = Photo.objects.all()
-    return render(request, 'infra/photo_list.html', {'photos': photos})
-
-def selected_photos(request):
-    selected_photo_ids = request.POST.getlist('selected_photos')
-    selected_photos = Photo.objects.filter(id__in=selected_photo_ids)
-    return render(request, 'infra/selected_photos.html', {'selected_photos': selected_photos})
-
-
-def panorama_list(request):
-    panoramas = Panorama.objects.all()
-    if request.method == 'POST':
-        selected_ids = request.POST.getlist('image_list')
-        for panorama in panoramas:
-            if str(panorama.id) in selected_ids:
-                panorama.checked = True
-            else:
-                panorama.checked = False
-            panorama.save()
-        return redirect('image_list')  # 再描画のためにリダイレクト
-    
-    return redirect('image_list')
-    #return render(request, 'image_list.html', {'panoramas': panoramas})
-
-def panorama_upload(request):
-    if request.method == 'POST':
-        image = request.FILES['image']
-        checked = request.POST.get('checked', False)
-        panorama = Panorama.objects.create(image=image, checked=checked)
-        return redirect('photo')
-    return render(request, 'panorama_upload.html')
 
 # << センサス調査 >>
 def census_view(request):
